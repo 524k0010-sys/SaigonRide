@@ -1,0 +1,27 @@
+﻿@model IEnumerable<SaigonRide.ViewModels.RevenueByCategoryReportViewModel>
+
+@{
+    ViewBag.Title = "Revenue Report";
+}
+
+<h2>Revenue by Vehicle Category</h2>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Vehicle Category</th>
+            <th>Total Rentals</th>
+            <th>Total Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.CategoryName</td>
+                <td>@item.TotalRentals</td>
+                <td>@item.TotalRevenue.ToString("N0") VND</td>
+            </tr>
+        }
+    </tbody>
+</table>

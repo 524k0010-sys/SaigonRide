@@ -206,6 +206,7 @@
     <Compile Include="Services\PricingService.cs" />
     <Compile Include="Services\ReportService.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="ViewModels\RevenueByCategoryReportViewModel.cs" />
     <Compile Include="ViewModels\StationInventoryReportViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -295,6 +296,7 @@
     <Content Include="Views\VehicleCategories\Edit.cshtml" />
     <Content Include="Views\VehicleCategories\Index.cshtml" />
     <Content Include="Views\Reports\Inventory.cshtml" />
+    <Content Include="Views\Reports\Revenue.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

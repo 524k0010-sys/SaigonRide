@@ -26,5 +26,19 @@ namespace SaigonRide.Services
                 MaintenanceVehicles = s.Vehicles.Count(v => v.Status == VehicleStatus.Maintenance)
             }).ToList();
         }
+
+        public List<RevenueByCategoryReportViewModel> GetRevenueByCategoryReport()
+        {
+            return db.Rentals
+                .Where(r => r.EndTime != null)
+                .GroupBy(r => r.Vehicle.VehicleCategory.Name)
+                .Select(g => new RevenueByCategoryReportViewModel
+                {
+                    CategoryName = g.Key,
+                    TotalRentals = g.Count(),
+                    TotalRevenue = g.Sum(r => r.TotalFare)
+                })
+                .ToList();
+        }
     }
 }

@@ -14,5 +14,12 @@ namespace SaigonRide.Controllers
             var report = service.GetStationInventoryReport();
             return View(report);
         }
+        public ActionResult Revenue()
+        {
+            var service = new ReportService(db);
+            var report = service.GetRevenueByCategoryReport();
+            return View(report);
+        }
+
     }
 }
