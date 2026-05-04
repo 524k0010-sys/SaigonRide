@@ -29,5 +29,11 @@ namespace SaigonRide.Models
         {
             return new ApplicationDbContext();
         }
+
+        public System.Data.Entity.DbSet<SaigonRide.Models.Vehicle> Vehicles { get; set; }
+
+        public System.Data.Entity.DbSet<SaigonRide.Models.Station> Stations { get; set; }
+
+        public System.Data.Entity.DbSet<SaigonRide.Models.VehicleCategory> VehicleCategories { get; set; }
     }
 }
