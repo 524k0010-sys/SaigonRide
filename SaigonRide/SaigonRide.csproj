@@ -171,6 +171,8 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\StationsController.cs" />
+    <Compile Include="Controllers\VehicleCategoriesController.cs" />
     <Compile Include="Controllers\VehiclesController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -266,6 +268,16 @@
     <Content Include="Views\Vehicles\Details.cshtml" />
     <Content Include="Views\Vehicles\Edit.cshtml" />
     <Content Include="Views\Vehicles\Index.cshtml" />
+    <Content Include="Views\Stations\Create.cshtml" />
+    <Content Include="Views\Stations\Delete.cshtml" />
+    <Content Include="Views\Stations\Details.cshtml" />
+    <Content Include="Views\Stations\Edit.cshtml" />
+    <Content Include="Views\Stations\Index.cshtml" />
+    <Content Include="Views\VehicleCategories\Create.cshtml" />
+    <Content Include="Views\VehicleCategories\Delete.cshtml" />
+    <Content Include="Views\VehicleCategories\Details.cshtml" />
+    <Content Include="Views\VehicleCategories\Edit.cshtml" />
+    <Content Include="Views\VehicleCategories\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
