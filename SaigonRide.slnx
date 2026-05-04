@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="SaigonRide.Tests/SaigonRide.Tests.csproj" Id="44a4d520-e29c-4e93-89a3-ba59fffbae98" />
   <Project Path="SaigonRide/SaigonRide.csproj" Id="d68c529f-4b71-441b-bc3c-5f3b546b89a0" />
 </Solution>
