@@ -10,6 +10,8 @@ using SaigonRide.Models;
 
 namespace SaigonRide.Controllers
 {
+    [Authorize]
+   
     public class VehiclesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

@@ -12,6 +12,7 @@ using System.Data.Entity.Infrastructure;
 
 namespace SaigonRide.Controllers
 {
+    [Authorize]
     public class VehicleCategoriesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();

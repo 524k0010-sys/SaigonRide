@@ -4,6 +4,7 @@ using SaigonRide.Services;
 
 namespace SaigonRide.Controllers
 {
+    [Authorize]
     public class ReportsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
