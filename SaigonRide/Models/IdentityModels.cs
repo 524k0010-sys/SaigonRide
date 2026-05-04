@@ -6,14 +6,11 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace SaigonRide.Models
 {
-    // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser
     {
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
         {
-            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
             var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
-            // Add custom user claims here
             return userIdentity;
         }
     }
@@ -35,5 +32,38 @@ namespace SaigonRide.Models
         public System.Data.Entity.DbSet<SaigonRide.Models.Station> Stations { get; set; }
 
         public System.Data.Entity.DbSet<SaigonRide.Models.VehicleCategory> VehicleCategories { get; set; }
+
+        public System.Data.Entity.DbSet<SaigonRide.Models.Rental> Rentals { get; set; }
+
+        public System.Data.Entity.DbSet<SaigonRide.Models.Payment> Payments { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Rental>()
+                .HasRequired(r => r.Vehicle)
+                .WithMany()
+                .HasForeignKey(r => r.VehicleId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Rental>()
+                .HasRequired(r => r.StartStation)
+                .WithMany()
+                .HasForeignKey(r => r.StartStationId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Rental>()
+                .HasOptional(r => r.ReturnStation)
+                .WithMany()
+                .HasForeignKey(r => r.ReturnStationId)
+                .WillCascadeOnDelete(false);
+
+            modelBuilder.Entity<Payment>()
+                .HasRequired(p => p.Rental)
+                .WithMany()
+                .HasForeignKey(p => p.RentalId)
+                .WillCascadeOnDelete(false);
+        }
     }
 }
