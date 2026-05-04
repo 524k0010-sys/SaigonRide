@@ -51,6 +51,10 @@ namespace SaigonRide.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include = "Id,VehicleCode,VehicleCategoryId,StationId,Status")] Vehicle vehicle)
         {
+            if (db.Vehicles.Any(v => v.VehicleCode == vehicle.VehicleCode))
+            {
+                ModelState.AddModelError("VehicleCode", "Vehicle code already exists.");
+            }
             if (ModelState.IsValid)
             {
                 db.Vehicles.Add(vehicle);
@@ -119,6 +123,13 @@ namespace SaigonRide.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Vehicle vehicle = db.Vehicles.Find(id);
+
+            if (vehicle.Status == VehicleStatus.InTransit)
+            {
+                TempData["Error"] = "Cannot delete a vehicle that is currently in transit.";
+                return RedirectToAction("Index");
+            }
+
             db.Vehicles.Remove(vehicle);
             db.SaveChanges();
             return RedirectToAction("Index");
