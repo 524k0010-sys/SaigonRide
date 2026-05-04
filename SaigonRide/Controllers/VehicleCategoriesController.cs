@@ -7,6 +7,8 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using SaigonRide.Models;
+using System.Data.Entity.Migrations;
+using System.Data.Entity.Infrastructure;
 
 namespace SaigonRide.Controllers
 {
@@ -122,6 +124,15 @@ namespace SaigonRide.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        static VehicleCategoriesController()
+        {
+            Database.SetInitializer(
+                new MigrateDatabaseToLatestVersion<
+                    SaigonRide.Models.ApplicationDbContext,
+                    SaigonRide.Migrations.Configuration>());
+
         }
     }
 }
