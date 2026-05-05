@@ -10,9 +10,17 @@
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    @{
+        var currentController = Convert.ToString(ViewContext.RouteData.Values["controller"]);
+        var currentAction = Convert.ToString(ViewContext.RouteData.Values["action"]);
+    }
+
+    <nav class="navbar navbar-expand-sm navbar-dark admin-navbar">
         <div class="container">
-            @Html.ActionLink("SaigonRide Admin", "Index", "Home", new { area = "" }, new { @class = "navbar-brand fw-bold" })
+            <a class="navbar-brand admin-brand" href="@Url.Action("Index", "Home")">
+                <span class="brand-mark">SR</span>
+                <span>SaigonRide Admin</span>
+            </a>
 
             <button type="button"
                     class="navbar-toggler"
@@ -26,28 +34,66 @@
             </button>
 
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Dashboard", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Vehicles", "Index", "Vehicles", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Stations", "Index", "Stations", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Categories", "Index", "VehicleCategories", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Inventory Report", "Inventory", "Reports", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Revenue Report", "Revenue", "Reports", new { area = "" }, new { @class = "nav-link" })</li>
+                <ul class="navbar-nav admin-menu flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "Home" ? "active" : "")"
+                           href="@Url.Action("Index", "Home")">
+                            Dashboard
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "Vehicles" ? "active" : "")"
+                           href="@Url.Action("Index", "Vehicles")">
+                            Vehicles
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "Stations" ? "active" : "")"
+                           href="@Url.Action("Index", "Stations")">
+                            Stations
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "VehicleCategories" ? "active" : "")"
+                           href="@Url.Action("Index", "VehicleCategories")">
+                            Categories
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
+                           href="@Url.Action("Inventory", "Reports")">
+                            Inventory Report
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link admin-nav-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
+                           href="@Url.Action("Revenue", "Reports")">
+                            Revenue Report
+                        </a>
+                    </li>
                 </ul>
 
-                @Html.Partial("_LoginPartial")
+                <div class="admin-login-area">
+                    @Html.Partial("_LoginPartial")
+                </div>
             </div>
         </div>
     </nav>
 
-    <main class="container body-content">
-        @RenderBody()
+    <main class="admin-shell">
+        <div class="container body-content admin-content">
+            @RenderBody()
 
-        <hr />
-
-        <footer class="text-muted small pb-3">
-            <p>&copy; @DateTime.Now.Year - SaigonRide Distributed Vehicle Rental System</p>
-        </footer>
+            <footer class="admin-footer">
+                <span>&copy; @DateTime.Now.Year SaigonRide</span>
+                <span>Distributed Vehicle Rental System</span>
+            </footer>
+        </div>
     </main>
 
     @Scripts.Render("~/bundles/jquery")
