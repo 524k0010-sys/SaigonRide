@@ -1,0 +1,52 @@
+﻿@model SaigonRide.ViewModels.EndTripViewModel
+
+@{
+    ViewBag.Title = "End Trip";
+}
+
+<div class="admin-page-header">
+    <h2>End Trip</h2>
+    <p>Choose the return station and user type before calculating the fare.</p>
+</div>
+
+<div class="form-card">
+    <dl class="dl-horizontal">
+        <dt>Vehicle</dt>
+        <dd>@Model.VehicleCode</dd>
+
+        <dt>Start Station</dt>
+        <dd>@Model.StartStationName</dd>
+
+        <dt>Start Time</dt>
+        <dd>@Model.StartTime.ToString("yyyy-MM-dd HH:mm")</dd>
+    </dl>
+
+    @using (Html.BeginForm("EndTrip", "Rentals", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        @Html.HiddenFor(m => m.RentalId)
+        @Html.HiddenFor(m => m.VehicleCode)
+        @Html.HiddenFor(m => m.StartStationName)
+        @Html.HiddenFor(m => m.StartTime)
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.ReturnStationId, "Return Station", new { @class = "form-label" })
+            @Html.DropDownListFor(m => m.ReturnStationId, Model.ReturnStations, "Choose return station", new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.ReturnStationId, "", new { @class = "text-danger" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(m => m.UserType, "User Type", new { @class = "form-label" })
+            @Html.DropDownListFor(
+                m => m.UserType,
+                new SelectList(new[] { "Local", "Tourist" }),
+                new { @class = "form-control" }
+            )
+        </div>
+
+        <button type="submit" class="btn btn-success">Calculate Fare</button>
+        @Html.ActionLink("Back to Vehicles", "Available", "Rentals", null, new { @class = "btn btn-outline-secondary ms-2" })
+    }
+</div>

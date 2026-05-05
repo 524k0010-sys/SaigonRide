@@ -7,7 +7,9 @@
     <title>@ViewBag.Title - SaigonRide Admin</title>
 
     @Styles.Render("~/Content/css")
+    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
     @Scripts.Render("~/bundles/modernizr")
+
 </head>
 <body>
     @{
@@ -40,9 +42,15 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link saigon-link @(currentController == "Rentals" ? "active" : "")"
+                           href="@Url.Action("Available", "Rentals")">Rent Vehicle</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
                            href="@Url.Action("Index", "Vehicles")">Vehicles</a>
                     </li>
+
 
                     <li class="nav-item">
                         <a class="nav-link saigon-link @(currentController == "Stations" ? "active" : "")"
@@ -77,7 +85,16 @@
             <div class="saigon-content">
                 @RenderBody()
 
-                <footer class="saigon-footer">
+                <footer class="saigon-footer"><li class="nav-item">
+    <a class="nav-link saigon-link @(currentController == "Home" ? "active" : "")"
+       href="@Url.Action("Index", "Home")">Dashboard</a>
+</li>
+
+<li class="nav-item">
+    <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
+       href="@Url.Action("Index", "Vehicles")">Vehicles</a>
+</li>
+
                     <span>&copy; @DateTime.Now.Year SaigonRide</span>
                     <span>Distributed Vehicle Rental System</span>
                 </footer>

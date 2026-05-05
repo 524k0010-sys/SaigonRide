@@ -1,0 +1,48 @@
+﻿@model SaigonRide.Models.Payment
+
+@{
+    ViewBag.Title = "Payment Success";
+}
+
+<div class="admin-page-header">
+    <h2>Payment Successful</h2>
+    <p>The rental trip has been completed and the vehicle is ready for the next user.</p>
+</div>
+
+<div class="form-card">
+    <h4>Receipt</h4>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Vehicle</th>
+            <td>@Model.Rental.Vehicle.VehicleCode</td>
+        </tr>
+        <tr>
+            <th>Category</th>
+            <td>@Model.Rental.Vehicle.VehicleCategory.Name</td>
+        </tr>
+        <tr>
+            <th>Return Station</th>
+            <td>@Model.Rental.ReturnStation.Name</td>
+        </tr>
+        <tr>
+            <th>Payment Method</th>
+            <td>@Model.Method</td>
+        </tr>
+        <tr>
+            <th>Status</th>
+            <td><span class="badge bg-success">@Model.Status</span></td>
+        </tr>
+        <tr>
+            <th>Amount</th>
+            <td><strong>@Model.Amount.ToString("N0") VND</strong></td>
+        </tr>
+        <tr>
+            <th>Paid At</th>
+            <td>@Model.PaidAt.ToString("yyyy-MM-dd HH:mm")</td>
+        </tr>
+    </table>
+
+    @Html.ActionLink("Rent Another Vehicle", "Available", "Rentals", null, new { @class = "btn btn-success" })
+    @Html.ActionLink("View Revenue Report", "Revenue", "Reports", null, new { @class = "btn btn-outline-primary ms-2" })
+</div>

@@ -171,6 +171,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="Controllers\RentalsController.cs" />
     <Compile Include="Controllers\ReportsController.cs" />
     <Compile Include="Controllers\StationsController.cs" />
     <Compile Include="Controllers\VehicleCategoriesController.cs" />
@@ -206,6 +207,8 @@
     <Compile Include="Services\PricingService.cs" />
     <Compile Include="Services\ReportService.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="ViewModels\CheckoutViewModel.cs" />
+    <Compile Include="ViewModels\EndTripViewModel.cs" />
     <Compile Include="ViewModels\RevenueByCategoryReportViewModel.cs" />
     <Compile Include="ViewModels\StationInventoryReportViewModel.cs" />
   </ItemGroup>
@@ -297,6 +300,10 @@
     <Content Include="Views\VehicleCategories\Index.cshtml" />
     <Content Include="Views\Reports\Inventory.cshtml" />
     <Content Include="Views\Reports\Revenue.cshtml" />
+    <Content Include="Views\Rentals\Available.cshtml" />
+    <Content Include="Views\Rentals\EndTrip.cshtml" />
+    <Content Include="Views\Rentals\Checkout.cshtml" />
+    <Content Include="Views\Rentals\Success.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
