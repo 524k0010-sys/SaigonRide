@@ -1,121 +1,50 @@
-﻿/* Set padding to keep content from hitting the edges */
-.body-content {
-    margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
+﻿html,
+body {
+    min-height: 100%;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
+body {
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
+    background: #eaf2f4;
+    color: #1f2933;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
 input,
 select,
 textarea {
-    max-width: 280px;
-}
-body {
-    background-color: #f5f7fa;
-    color: #1f2933;
+    max-width: 100%;
 }
 
-.navbar {
-    box-shadow: 0 2px 12px rgba(15, 23, 42, 0.18);
+.saigon-navbar {
+    min-height: 72px;
+    background: #0f766e !important;
+    background-image: linear-gradient(90deg, #0f766e 0%, #15803d 52%, #2563eb 100%) !important;
+    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.30);
 }
 
-.body-content {
-    padding-top: 28px;
-}
-
-.admin-page-header {
-    background: #ffffff;
-    border-left: 5px solid #16a34a;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-}
-
-    .admin-page-header h2 {
-        margin: 0;
-        font-weight: 700;
-    }
-
-    .admin-page-header p {
-        margin: 6px 0 0;
-        color: #64748b;
-    }
-
-.table {
-    background: #ffffff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-}
-
-    .table th {
-        background-color: #0f172a;
-        color: white;
-        font-weight: 600;
-    }
-
-    .table tbody tr:hover {
-        background-color: #eef6f1;
-        transition: 0.15s ease;
-    }
-
-.btn {
-    border-radius: 6px;
-    font-weight: 600;
-}
-
-.admin-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
-    transition: 0.15s ease;
-}
-
-    .admin-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
-    }
-
-.admin-stat {
-    font-size: 32px;
-    font-weight: 800;
-    color: #16a34a;
-}
-body {
-    min-height: 100vh;
-    background: #eef3f6;
-    color: #1f2933;
-}
-
-.admin-navbar {
-    background: linear-gradient(90deg, #0f766e 0%, #15803d 48%, #2563eb 100%);
-    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.28);
-}
-
-.admin-brand {
-    display: inline-flex;
+.saigon-brand {
+    display: inline-flex !important;
     align-items: center;
     gap: 10px;
+    color: #ffffff !important;
+    font-size: 20px;
     font-weight: 800;
-    letter-spacing: 0;
+    text-decoration: none;
+    white-space: nowrap;
 }
+
+    .saigon-brand:hover {
+        color: #ffffff !important;
+    }
 
 .brand-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 40px;
+    height: 40px;
     border-radius: 8px;
     background: #ffffff;
     color: #0f766e;
@@ -123,50 +52,61 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
 
-.admin-menu {
+.saigon-menu {
     gap: 6px;
-    margin-left: 22px;
+    margin-left: 24px;
 }
 
-.admin-nav-link {
-    color: rgba(255, 255, 255, 0.88) !important;
-    padding: 9px 13px !important;
+.saigon-link {
+    color: #ecfeff !important;
+    padding: 10px 14px !important;
     border-radius: 8px;
-    font-weight: 650;
+    font-weight: 700;
+    text-decoration: none;
     transition: background-color 0.18s ease, transform 0.18s ease, color 0.18s ease;
 }
 
-    .admin-nav-link:hover {
+    .saigon-link:hover {
         color: #ffffff !important;
         background: rgba(255, 255, 255, 0.18);
         transform: translateY(-1px);
     }
 
-    .admin-nav-link.active {
+    .saigon-link.active {
         color: #0f172a !important;
         background: #ffffff;
         box-shadow: 0 5px 14px rgba(15, 23, 42, 0.18);
     }
 
-.admin-login-area a {
+.saigon-login a {
     color: #ffffff !important;
-    font-weight: 650;
+    font-weight: 700;
+    text-decoration: none;
 }
 
-.admin-shell {
-    min-height: calc(100vh - 64px);
+    .saigon-login a:hover {
+        text-decoration: underline;
+    }
+
+.saigon-toggler {
+    border-color: rgba(255, 255, 255, 0.55);
+}
+
+.saigon-page {
+    min-height: calc(100vh - 72px);
     padding: 30px 0;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(238, 243, 246, 0.96)), #eef3f6;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(234, 242, 244, 0.96)), #eaf2f4;
 }
 
-.admin-content {
+.saigon-content {
+    min-height: calc(100vh - 132px);
     background: #ffffff;
     border-radius: 10px;
     padding: 28px;
     box-shadow: 0 12px 32px rgba(15, 23, 42, 0.10);
 }
 
-.admin-footer {
+.saigon-footer {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -191,7 +131,7 @@ body {
     }
 
     .table tbody tr {
-        transition: background-color 0.16s ease, transform 0.16s ease;
+        transition: background-color 0.16s ease;
     }
 
         .table tbody tr:hover {
@@ -211,3 +151,99 @@ input[type="submit"] {
         box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
     }
 
+.admin-page-header {
+    background: #f8fafc;
+    border: 1px solid #dbe3ea;
+    border-left: 6px solid #0f766e;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 22px;
+}
+
+    .admin-page-header h2 {
+        margin: 0;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .admin-page-header p {
+        margin: 6px 0 0;
+        color: #64748b;
+    }
+
+.admin-card {
+    background: #ffffff;
+    border: 1px solid #dbe3ea;
+    border-radius: 10px;
+    padding: 20px;
+    height: 100%;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+    .admin-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.13);
+    }
+
+.admin-stat {
+    font-size: 32px;
+    font-weight: 850;
+    color: #0f766e;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.badge {
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.form-horizontal,
+.form-card {
+    background: #ffffff;
+    border: 1px solid #dbe3ea;
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+}
+
+.form-control {
+    border-radius: 8px;
+    border-color: #cbd5e1;
+}
+
+    .form-control:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 0.2rem rgba(15, 118, 110, 0.16);
+    }
+
+@media (max-width: 992px) {
+    .saigon-menu {
+        margin-left: 0;
+        margin-top: 14px;
+    }
+
+    .saigon-link {
+        margin-bottom: 4px;
+    }
+
+    .saigon-login {
+        margin-top: 12px;
+    }
+}
+
+@media (max-width: 768px) {
+    .saigon-content {
+        padding: 18px;
+    }
+
+    .saigon-footer {
+        display: block;
+    }
+}

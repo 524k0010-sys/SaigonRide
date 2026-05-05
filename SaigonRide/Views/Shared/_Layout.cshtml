@@ -15,84 +15,73 @@
         var currentAction = Convert.ToString(ViewContext.RouteData.Values["action"]);
     }
 
-    <nav class="navbar navbar-expand-sm navbar-dark admin-navbar">
-        <div class="container">
-            <a class="navbar-brand admin-brand" href="@Url.Action("Index", "Home")">
+    <nav class="navbar navbar-expand-lg saigon-navbar">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand saigon-brand" href="@Url.Action("Index", "Home")">
                 <span class="brand-mark">SR</span>
                 <span>SaigonRide Admin</span>
             </a>
 
             <button type="button"
-                    class="navbar-toggler"
+                    class="navbar-toggler saigon-toggler"
                     data-bs-toggle="collapse"
-                    data-bs-target=".navbar-collapse"
-                    title="Toggle navigation"
-                    aria-controls="navbarSupportedContent"
+                    data-bs-target="#saigonNavbar"
+                    aria-controls="saigonNavbar"
                     aria-expanded="false"
                     aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav admin-menu flex-grow-1">
+            <div id="saigonNavbar" class="collapse navbar-collapse">
+                <ul class="navbar-nav saigon-menu me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "Home" ? "active" : "")"
-                           href="@Url.Action("Index", "Home")">
-                            Dashboard
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "Home" ? "active" : "")"
+                           href="@Url.Action("Index", "Home")">Dashboard</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "Vehicles" ? "active" : "")"
-                           href="@Url.Action("Index", "Vehicles")">
-                            Vehicles
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
+                           href="@Url.Action("Index", "Vehicles")">Vehicles</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "Stations" ? "active" : "")"
-                           href="@Url.Action("Index", "Stations")">
-                            Stations
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "Stations" ? "active" : "")"
+                           href="@Url.Action("Index", "Stations")">Stations</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "VehicleCategories" ? "active" : "")"
-                           href="@Url.Action("Index", "VehicleCategories")">
-                            Categories
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "VehicleCategories" ? "active" : "")"
+                           href="@Url.Action("Index", "VehicleCategories")">Categories</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
-                           href="@Url.Action("Inventory", "Reports")">
-                            Inventory Report
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
+                           href="@Url.Action("Inventory", "Reports")">Inventory</a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link admin-nav-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
-                           href="@Url.Action("Revenue", "Reports")">
-                            Revenue Report
-                        </a>
+                        <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
+                           href="@Url.Action("Revenue", "Reports")">Revenue</a>
                     </li>
                 </ul>
 
-                <div class="admin-login-area">
+                <div class="saigon-login">
                     @Html.Partial("_LoginPartial")
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="admin-shell">
-        <div class="container body-content admin-content">
-            @RenderBody()
+    <main class="saigon-page">
+        <div class="container-fluid px-4">
+            <div class="saigon-content">
+                @RenderBody()
 
-            <footer class="admin-footer">
-                <span>&copy; @DateTime.Now.Year SaigonRide</span>
-                <span>Distributed Vehicle Rental System</span>
-            </footer>
+                <footer class="saigon-footer">
+                    <span>&copy; @DateTime.Now.Year SaigonRide</span>
+                    <span>Distributed Vehicle Rental System</span>
+                </footer>
+            </div>
         </div>
     </main>
 
