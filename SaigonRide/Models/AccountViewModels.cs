@@ -60,6 +60,9 @@ namespace SaigonRide.Models
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+
+        [Display(Name = "Login as")]
+        public string RoleChoice { get; set; }
     }
 
     public class RegisterViewModel

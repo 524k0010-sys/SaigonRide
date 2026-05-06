@@ -23,6 +23,57 @@ namespace SaigonRide.Controllers
             return View(vehicles.ToList());
         }
 
+        // GET: Vehicles/Tracking
+        public ActionResult Tracking(string status, int? stationId)
+        {
+            var query = db.Vehicles.Include(v => v.Station).Include(v => v.VehicleCategory).AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                if (Enum.TryParse<VehicleStatus>(status, true, out var vs))
+                {
+                    query = query.Where(v => v.Status == vs);
+                }
+            }
+
+            if (stationId.HasValue)
+            {
+                query = query.Where(v => v.StationId == stationId.Value);
+            }
+
+            var vehicles = query.ToList();
+
+            // last activity (last rental end time or start time)
+            var lastMap = db.Rentals
+                .GroupBy(r => r.VehicleId)
+                .Select(g => new { VehicleId = g.Key, Last = g.Max(r => (DateTime?) (r.EndTime ?? r.StartTime)) })
+                .ToDictionary(x => x.VehicleId, x => x.Last);
+
+            ViewBag.LastActivity = lastMap;
+            ViewBag.Stations = new SelectList(db.Stations.OrderBy(s => s.Name).ToList(), "Id", "Name");
+            ViewBag.SelectedStatus = status;
+            ViewBag.SelectedStation = stationId;
+
+            return View(vehicles);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult SetStatus(int id, VehicleStatus status)
+        {
+            var vehicle = db.Vehicles.Find(id);
+            if (vehicle == null)
+            {
+                return HttpNotFound();
+            }
+
+            vehicle.Status = status;
+            db.Entry(vehicle).State = EntityState.Modified;
+            db.SaveChanges();
+
+            return RedirectToAction("Tracking");
+        }
+
         // GET: Vehicles/Details/5
         public ActionResult Details(int? id)
         {
@@ -126,9 +177,22 @@ namespace SaigonRide.Controllers
         {
             Vehicle vehicle = db.Vehicles.Find(id);
 
+            if (vehicle == null)
+            {
+                return HttpNotFound();
+            }
+
             if (vehicle.Status == VehicleStatus.InTransit)
             {
                 TempData["Error"] = "Cannot delete a vehicle that is currently in transit.";
+                return RedirectToAction("Index");
+            }
+
+            // Prevent delete when there are related rentals/payments to avoid DB referential integrity errors
+            var hasRentals = db.Rentals.Any(r => r.VehicleId == id);
+            if (hasRentals)
+            {
+                TempData["Error"] = "Cannot delete this vehicle because it has rental history. Remove related rentals/payments first.";
                 return RedirectToAction("Index");
             }
 

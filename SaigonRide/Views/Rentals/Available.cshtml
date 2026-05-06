@@ -39,10 +39,52 @@
                     <td>@item.Station.Name</td>
                     <td><span class="badge bg-success">Ready</span></td>
                     <td>
-                        @Html.ActionLink("Start Trip", "StartTrip", "Rentals", new { id = item.Id }, new { @class = "btn btn-success btn-sm" })
+                        <form class="start-trip-form" method="post" action="@Url.Action("StartTrip", "Rentals")" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Start Trip</button>
+                        </form>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@section scripts{
+    <script>
+        (function(){
+            document.querySelectorAll('.start-trip-form').forEach(function(form){
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    var data = new FormData(form);
+                    var token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: data,
+                        credentials: 'same-origin'
+                    }).then(function(resp){
+                        return resp.json();
+                    }).then(function(json){
+                        if (json && json.success){
+                            // remove the vehicle row from the table so it disappears from Available list
+                            var row = form.closest('tr');
+                            if (row) row.parentNode.removeChild(row);
+                            // optionally redirect to TripInProgress
+                            window.location = '/Rentals/TripInProgress/' + json.rentalId;
+                        } else {
+                            alert('Unable to start trip.');
+                        }
+                    }).catch(function(){
+                        alert('Unable to start trip (network error).');
+                    });
+                });
+            });
+        })();
+    </script>
+}

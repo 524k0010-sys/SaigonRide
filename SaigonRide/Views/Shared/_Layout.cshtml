@@ -38,7 +38,7 @@
                 <ul class="navbar-nav saigon-menu me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link saigon-link @(currentController == "Home" ? "active" : "")"
-                           href="@Url.Action("Index", "Home")">Dashboard</a>
+                           href="@Url.Action("Index", "Home")">Home Page</a>
                     </li>
 
                     <li class="nav-item">
@@ -46,36 +46,40 @@
                            href="@Url.Action("Available", "Rentals")">Rent Vehicle</a>
                     </li>
 
+                    @* Tracking link restored *@
                     <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
-                           href="@Url.Action("Index", "Vehicles")">Vehicles</a>
+                        <a class="nav-link saigon-link @(currentController == "Vehicles" && currentAction == "Tracking" ? "active" : "")"
+                           href="@Url.Action("Tracking", "Vehicles")">Tracking</a>
                     </li>
 
-
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Stations" ? "active" : "")"
-                           href="@Url.Action("Index", "Stations")">Stations</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "VehicleCategories" ? "active" : "")"
-                           href="@Url.Action("Index", "VehicleCategories")">Categories</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
-                           href="@Url.Action("Inventory", "Reports")">Inventory</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
-                           href="@Url.Action("Revenue", "Reports")">Revenue</a>
-                    </li>
+                    @* show admin navigation links on the left when user is in Admin role to match user layout *@
+                    @if (Request.IsAuthenticated && User.IsInRole("Admin"))
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
+                               href="@Url.Action("Index", "Vehicles")">Vehicles</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Stations" ? "active" : "")"
+                               href="@Url.Action("Index", "Stations")">Stations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "VehicleCategories" ? "active" : "")"
+                               href="@Url.Action("Index", "VehicleCategories")">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
+                               href="@Url.Action("Inventory", "Reports")">Inventory</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
+                               href="@Url.Action("Revenue", "Reports")">Revenue</a>
+                        </li>
+                    }
                 </ul>
-
-                <div class="saigon-login">
-                    @Html.Partial("_LoginPartial")
-                </div>
+            </div>
+            <div class="d-flex align-items-center ms-auto">
+                @Html.Partial("_LoginPartial")
             </div>
         </div>
     </nav>
@@ -85,16 +89,7 @@
             <div class="saigon-content">
                 @RenderBody()
 
-                <footer class="saigon-footer"><li class="nav-item">
-    <a class="nav-link saigon-link @(currentController == "Home" ? "active" : "")"
-       href="@Url.Action("Index", "Home")">Dashboard</a>
-</li>
-
-<li class="nav-item">
-    <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
-       href="@Url.Action("Index", "Vehicles")">Vehicles</a>
-</li>
-
+                <footer class="saigon-footer">
                     <span>&copy; @DateTime.Now.Year SaigonRide</span>
                     <span>Distributed Vehicle Rental System</span>
                 </footer>

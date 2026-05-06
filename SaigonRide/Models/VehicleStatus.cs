@@ -5,5 +5,7 @@
         Ready,
         InTransit,
         Maintenance
+        ,
+        Reserved
     }
 }

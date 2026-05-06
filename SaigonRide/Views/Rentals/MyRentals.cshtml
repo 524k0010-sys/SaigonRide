@@ -1,0 +1,58 @@
+@model IEnumerable<SaigonRide.Models.Rental>
+@{
+    ViewBag.Title = "My Rentals";
+    var isAdmin = ViewBag.IsAdmin as bool? ?? false;
+}
+
+<div class="admin-page-header">
+    <h2>@(isAdmin ? "All Rentals (Admin)" : "My Rentals")</h2>
+    <p>List of current and past rentals.</p>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Vehicle</th>
+            <th>Start Station</th>
+            <th>Start Time</th>
+            <th>End Time</th>
+            <th>Total Fare</th>
+            <th>Status</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var r in Model)
+        {
+            <tr>
+                <td>@r.Id</td>
+                <td>@(r.Vehicle != null ? r.Vehicle.VehicleCode : "-")</td>
+                <td>@(r.StartStation != null ? r.StartStation.Name : "-")</td>
+                <td>@r.StartTime.ToString("g")</td>
+                <td>@(r.EndTime.HasValue ? r.EndTime.Value.ToString("g") : "In progress")</td>
+                <td>@(r.TotalFare > 0 ? r.TotalFare.ToString("N0") + " VND" : "-")</td>
+                <td>
+                    @if (!r.EndTime.HasValue)
+                    {
+                        <span class="badge bg-warning text-dark">In transit</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Completed</span>
+                    }
+                </td>
+                <td>
+                    @if (!r.EndTime.HasValue && ((!isAdmin && r.UserId == ViewBag.CurrentUserId) || isAdmin))
+                    {
+                        <a class="btn btn-sm btn-primary" href="@Url.Action("ReturnVehicle", "Rentals", new { id = r.Id })">Return</a>
+                    }
+                    else if (r.EndTime.HasValue && r.TotalFare > 0)
+                    {
+                        <a class="btn btn-sm btn-secondary" href="@Url.Action("Checkout", "Rentals", new { id = r.Id })">Checkout</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

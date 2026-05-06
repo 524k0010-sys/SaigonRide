@@ -43,6 +43,11 @@
         </tr>
     </table>
 
-    @Html.ActionLink("Rent Another Vehicle", "Available", "Rentals", null, new { @class = "btn btn-success" })
+    <form method="post" action="@Url.Action("StartTrip", "Rentals")" style="display:inline">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" value="@Model.Rental.VehicleId" />
+        <input type="hidden" name="returnTo" value="available" />
+        <button type="submit" class="btn btn-success">Rent Another Vehicle</button>
+    </form>
     @Html.ActionLink("View Revenue Report", "Revenue", "Reports", null, new { @class = "btn btn-outline-primary ms-2" })
 </div>

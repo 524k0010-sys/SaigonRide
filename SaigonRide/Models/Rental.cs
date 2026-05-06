@@ -26,6 +26,8 @@ namespace SaigonRide.Models
 
         public decimal TotalFare { get; set; }
 
+        public RentalStatus Status { get; set; }
+
         public virtual Vehicle Vehicle { get; set; }
         public virtual Station StartStation { get; set; }
         public virtual Station ReturnStation { get; set; }

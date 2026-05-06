@@ -15,18 +15,27 @@ namespace SaigonRide.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+
+
         public ActionResult Available()
         {
+            // hide vehicles that were returned very recently so they don't show up immediately
+            // after a return/payment. Use a short cooldown window (2 minutes).
+            var cutoff = DateTime.Now.AddMinutes(-2);
+
             var vehicles = db.Vehicles
                 .Include(v => v.Station)
                 .Include(v => v.VehicleCategory)
-                .Where(v => v.Status == VehicleStatus.Ready)
+                .Where(v => v.Status == VehicleStatus.Ready &&
+                            !db.Rentals.Any(r => r.VehicleId == v.Id && r.EndTime.HasValue && r.EndTime.Value >= cutoff))
                 .ToList();
 
             return View(vehicles);
         }
 
-        public ActionResult StartTrip(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult StartTrip(int id, string returnTo = null)
         {
             var vehicle = db.Vehicles
                 .Include(v => v.Station)
@@ -56,15 +65,72 @@ namespace SaigonRide.Controllers
 
             vehicle.Status = VehicleStatus.InTransit;
 
+            // ensure vehicle status update is tracked
+            db.Entry(vehicle).State = EntityState.Modified;
+
             if (station != null && station.CurrentInventory > 0)
             {
                 station.CurrentInventory -= 1;
+                db.Entry(station).State = EntityState.Modified;
             }
 
             db.Rentals.Add(rental);
             db.SaveChanges();
 
-            return RedirectToAction("EndTrip", new { id = rental.Id });
+            // If called via AJAX, return JSON so client can update UI immediately.
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = true, rentalId = rental.Id });
+            }
+
+            // If caller requested to be returned to Vehicles index or Available (rent) page, handle those
+            if (!string.IsNullOrEmpty(returnTo))
+            {
+                if (returnTo.Equals("vehicles", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["Info"] = $"Vehicle {vehicle.VehicleCode} started (InTransit).";
+                    return RedirectToAction("Index", "Vehicles");
+                }
+
+                if (returnTo.Equals("available", StringComparison.OrdinalIgnoreCase) ||
+                    returnTo.Equals("rent", StringComparison.OrdinalIgnoreCase) ||
+                    returnTo.Equals("rentals", StringComparison.OrdinalIgnoreCase))
+                {
+                    TempData["Info"] = $"Vehicle {vehicle.VehicleCode} started (InTransit).";
+                    return RedirectToAction("Available", "Rentals");
+                }
+            }
+
+            // After starting a trip show an in-progress page. Customers can end trip; admins have admin return controls.
+            return RedirectToAction("TripInProgress", new { id = rental.Id });
+        }
+
+        // GET: Rentals/TripInProgress/5
+        public ActionResult TripInProgress(int? id)
+        {
+            if (id == null)
+            {
+                TempData["Error"] = "Trip id is required.";
+                return RedirectToAction("Available");
+            }
+
+            var rental = db.Rentals
+                .Include(r => r.Vehicle.VehicleCategory)
+                .Include(r => r.StartStation)
+                .FirstOrDefault(r => r.Id == id.Value);
+
+            if (rental == null)
+            {
+                return HttpNotFound();
+            }
+
+            // only owner or admin can view
+            if (!User.IsInRole("Admin") && rental.UserId != User.Identity.GetUserId())
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            return View(rental);
         }
 
         public ActionResult EndTrip(int id)
@@ -175,8 +241,10 @@ namespace SaigonRide.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult ConfirmPayment(CheckoutViewModel model)
         {
+            // load rental together with its vehicle and return station to ensure updates are tracked
             var rental = db.Rentals
                 .Include(r => r.Vehicle)
+                .Include(r => r.ReturnStation)
                 .FirstOrDefault(r => r.Id == model.RentalId);
 
             if (rental == null)
@@ -206,18 +274,26 @@ namespace SaigonRide.Controllers
                 PaidAt = DateTime.Now
             };
 
-            var returnStation = db.Stations.Find(rental.ReturnStationId);
+            // update vehicle and station via tracked entities
+            var vehicle = rental.Vehicle;
+            var returnStation = rental.ReturnStation;
 
-            rental.Vehicle.Status = VehicleStatus.Ready;
-
-            if (returnStation != null)
+            if (vehicle != null)
             {
-                rental.Vehicle.StationId = returnStation.Id;
+                vehicle.Status = VehicleStatus.Ready;
 
-                if (returnStation.CurrentInventory < returnStation.Capacity)
+                if (returnStation != null)
                 {
-                    returnStation.CurrentInventory += 1;
+                    vehicle.StationId = returnStation.Id;
+
+                    if (returnStation.CurrentInventory < returnStation.Capacity)
+                    {
+                        returnStation.CurrentInventory += 1;
+                        db.Entry(returnStation).State = EntityState.Modified;
+                    }
                 }
+
+                db.Entry(vehicle).State = EntityState.Modified;
             }
 
             db.Payments.Add(payment);
@@ -239,6 +315,105 @@ namespace SaigonRide.Controllers
             }
 
             return View(payment);
+        }
+
+        // GET: Rentals/MyRentals
+        public ActionResult MyRentals()
+        {
+            var isAdmin = User.IsInRole("Admin");
+
+            ViewBag.CurrentUserId = User.Identity.GetUserId();
+
+            var rentals = db.Rentals
+                .Include(r => r.Vehicle)
+                .Include(r => r.StartStation)
+                .Include(r => r.ReturnStation)
+                .AsQueryable();
+
+            if (!isAdmin)
+            {
+                var userId = User.Identity.GetUserId();
+                rentals = rentals.Where(r => r.UserId == userId);
+            }
+
+            ViewBag.IsAdmin = isAdmin;
+
+            return View(rentals.OrderByDescending(r => r.StartTime).ToList());
+        }
+
+        // GET: Rentals/ReturnVehicle/5
+        public ActionResult ReturnVehicle(int id)
+        {
+            var rental = db.Rentals
+                .Include(r => r.Vehicle.VehicleCategory)
+                .Include(r => r.StartStation)
+                .FirstOrDefault(r => r.Id == id);
+
+            if (rental == null)
+            {
+                return HttpNotFound();
+            }
+
+            // only owner or admin can return
+            if (!User.IsInRole("Admin") && rental.UserId != User.Identity.GetUserId())
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            ViewBag.Stations = new SelectList(db.Stations.OrderBy(s => s.Name).ToList(), "Id", "Name");
+
+            return View(rental);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ProcessReturn(int Id, int EndStationId)
+        {
+            var rental = db.Rentals
+                .Include(r => r.Vehicle.VehicleCategory)
+                .FirstOrDefault(r => r.Id == Id);
+
+            var returnStation = db.Stations.Find(EndStationId);
+
+            if (rental == null || returnStation == null)
+            {
+                return HttpNotFound();
+            }
+
+            // only owner or admin can process
+            if (!User.IsInRole("Admin") && rental.UserId != User.Identity.GetUserId())
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            if (returnStation.CurrentInventory >= returnStation.Capacity)
+            {
+                TempData["Error"] = "This station is full. Please choose another return station.";
+                ViewBag.Stations = new SelectList(db.Stations.OrderBy(s => s.Name).ToList(), "Id", "Name");
+                return View("ReturnVehicle", rental);
+            }
+
+            var pricingService = new PricingService();
+            var endTime = DateTime.Now;
+            var baseFare = pricingService.CalculateBaseFare(
+                rental.StartTime,
+                endTime,
+                rental.Vehicle.VehicleCategory.PricePerMinute
+            );
+
+            var discount = pricingService.CalculateDiscount(baseFare, returnStation);
+            var totalFare = pricingService.CalculateTotalFare(baseFare, discount);
+
+            rental.EndTime = endTime;
+            rental.ReturnStationId = returnStation.Id;
+            rental.BaseFare = baseFare;
+            rental.DiscountAmount = discount;
+            rental.TotalFare = totalFare;
+
+            db.SaveChanges();
+
+            // redirect to checkout where payment is confirmed
+            return RedirectToAction("Checkout", new { id = rental.Id, userType = "Local" });
         }
 
         private IEnumerable<SelectListItem> GetStationOptions()

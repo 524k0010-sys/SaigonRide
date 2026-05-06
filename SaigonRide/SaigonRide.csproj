@@ -191,6 +191,10 @@
     <Compile Include="Migrations\202605042032426_AddRentalAndPaymentModels.Designer.cs">
       <DependentUpon>202605042032426_AddRentalAndPaymentModels.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605051742227_Update_For_RentalStatus.cs" />
+    <Compile Include="Migrations\202605051742227_Update_For_RentalStatus.Designer.cs">
+      <DependentUpon>202605051742227_Update_For_RentalStatus.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -199,6 +203,7 @@
     <Compile Include="Models\PaymentMethod.cs" />
     <Compile Include="Models\PaymentStatus.cs" />
     <Compile Include="Models\Rental.cs" />
+    <Compile Include="Models\RentalStatus.cs" />
     <Compile Include="Models\Station.cs" />
     <Compile Include="Models\Vehicle.cs" />
     <Compile Include="Models\VehicleCategory.cs" />
@@ -210,6 +215,7 @@
     <Compile Include="ViewModels\CheckoutViewModel.cs" />
     <Compile Include="ViewModels\EndTripViewModel.cs" />
     <Compile Include="ViewModels\RevenueByCategoryReportViewModel.cs" />
+    <Compile Include="ViewModels\RevenueByUserReportViewModel.cs" />
     <Compile Include="ViewModels\StationInventoryReportViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -229,6 +235,7 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
+    <Content Include="Content\Images\rent-bike.jpg" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
@@ -304,6 +311,11 @@
     <Content Include="Views\Rentals\EndTrip.cshtml" />
     <Content Include="Views\Rentals\Checkout.cshtml" />
     <Content Include="Views\Rentals\Success.cshtml" />
+    <Content Include="Views\Rentals\ReturnVehicle.cshtml" />
+    <Content Include="Views\Rentals\MyRentals.cshtml" />
+    <Content Include="Views\Rentals\TripInProgress.cshtml" />
+    <Content Include="Views\Vehicles\Tracking.cshtml" />
+    <Content Include="Views\Reports\RevenueByUser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -344,6 +356,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605042032426_AddRentalAndPaymentModels.resx">
       <DependentUpon>202605042032426_AddRentalAndPaymentModels.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605051742227_Update_For_RentalStatus.resx">
+      <DependentUpon>202605051742227_Update_For_RentalStatus.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
