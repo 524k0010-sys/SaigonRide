@@ -23,6 +23,42 @@ namespace SaigonRide.Controllers
             return View(vehicles.ToList());
         }
 
+        // POST: Vehicles/DeleteFromIndex/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteFromIndex(int id)
+        {
+            var vehicle = db.Vehicles.Find(id);
+            if (vehicle == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (vehicle.Status == VehicleStatus.InTransit)
+            {
+                TempData["Error"] = "Cannot delete a vehicle that is currently in transit.";
+                return RedirectToAction("Index");
+            }
+
+            // remove dependent payments and rentals to allow deletion
+            var rentals = db.Rentals.Where(r => r.VehicleId == id).ToList();
+            if (rentals.Any())
+            {
+                // remove payments linked to these rentals first
+                var rentalIds = rentals.Select(r => r.Id).ToList();
+                var payments = db.Payments.Where(p => rentalIds.Contains(p.RentalId)).ToList();
+                if (payments.Any()) db.Payments.RemoveRange(payments);
+
+                db.Rentals.RemoveRange(rentals);
+            }
+
+            db.Vehicles.Remove(vehicle);
+            db.SaveChanges();
+
+            TempData["Info"] = "Vehicle deleted.";
+            return RedirectToAction("Index");
+        }
+
         // GET: Vehicles/Tracking
         public ActionResult Tracking(string status, int? stationId)
         {
