@@ -10,6 +10,7 @@ namespace SaigonRide.Models
         [Required]
         public string Name { get; set; }
 
+        [Range(typeof(decimal), "1", "1000000")]
         public decimal PricePerMinute { get; set; }
 
         public virtual ICollection<Vehicle> Vehicles { get; set; }

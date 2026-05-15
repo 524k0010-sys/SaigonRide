@@ -54,6 +54,7 @@
 @section scripts{
     <script>
         (function(){
+            var tripUrlBase = '@Url.Action("TripInProgress", "Rentals")';
             document.querySelectorAll('.start-trip-form').forEach(function(form){
                 form.addEventListener('submit', function(e){
                     e.preventDefault();
@@ -69,16 +70,17 @@
                         body: data,
                         credentials: 'same-origin'
                     }).then(function(resp){
+                        if (!resp.ok) {
+                            throw new Error('Unable to start trip.');
+                        }
                         return resp.json();
                     }).then(function(json){
                         if (json && json.success){
-                            // remove the vehicle row from the table so it disappears from Available list
                             var row = form.closest('tr');
                             if (row) row.parentNode.removeChild(row);
-                            // optionally redirect to TripInProgress
-                            window.location = '/Rentals/TripInProgress/' + json.rentalId;
+                            window.location = tripUrlBase + '/' + json.rentalId;
                         } else {
-                            alert('Unable to start trip.');
+                            alert((json && json.message) || 'Unable to start trip.');
                         }
                     }).catch(function(){
                         alert('Unable to start trip (network error).');

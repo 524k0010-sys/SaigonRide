@@ -1,39 +1,35 @@
 ﻿@{
-    ViewBag.Title = "Home Page";
+    var langCookie = Request.Cookies["sr_lang"];
+    var isVi = langCookie != null && string.Equals(langCookie.Value, "vi", StringComparison.OrdinalIgnoreCase);
+    ViewBag.Title = isVi ? "Trang chủ" : "Home Page";
 }
 
-<main class="saigon-page">
-    <div class="container-fluid px-4">
-        <div class="saigon-content">
-            <div class="home-hero">
-                <div class="home-hero-content">
-                    <div>
-                        <span class="hero-tag">SaigonRide</span>
-                        <h1>Rent bikes & e-scooters in minutes</h1>
-                        <p>Fast, safe and affordable shared vehicles across the city. Find a nearby station, start a trip and return anywhere in the network.</p>
+<div class="home-hero">
+    <div class="home-hero-content">
+        <div>
+            <span class="hero-tag">SaigonRide</span>
+            <h1>@(isVi ? "Thuê xe đạp và e-scooter trong vài phút" : "Rent bikes & e-scooters in minutes")</h1>
+            <p>@(isVi ? "Nhanh, an toàn và tiết kiệm cho việc di chuyển trong thành phố. Tìm trạm gần bạn, bắt đầu chuyến đi và trả xe trong cùng mạng lưới." : "Fast, safe and affordable shared vehicles across the city. Find a nearby station, start a trip and return anywhere in the network.")</p>
 
-                        <div class="hero-actions mt-3">
-                            <a href="@Url.Action("Available", "Rentals")" class="btn btn-success btn-lg">Rent a Vehicle</a>
-                            <a href="@Url.Action("MyRentals", "Rentals")" class="btn btn-outline-secondary btn-lg">My Rentals</a>
-                        </div>
+            <div class="hero-actions mt-3">
+                <a href="@Url.Action("Available", "Rentals")" class="btn btn-success btn-lg">@(isVi ? "Thuê xe" : "Rent a Vehicle")</a>
+                <a href="@Url.Action("MyRentals", "Rentals")" class="btn btn-outline-secondary btn-lg">@(isVi ? "Chuyến của tôi" : "My Rentals")</a>
+            </div>
 
-                        <div class="row mt-4">
-                            <div class="col-6">
-                                <strong>Easy booking</strong>
-                                <p class="text-muted small">Choose and unlock in one click.</p>
-                            </div>
-                            <div class="col-6">
-                                <strong>Transparent pricing</strong>
-                                <p class="text-muted small">Pay per minute, view receipts instantly.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="hero-image-box">
-                        <img class="hero-image" src="https://bizweb.dktcdn.net/100/066/626/products/trinx-khong-logo-2-of-2.jpg?v=1684825805130" alt="Rent a bike" />
-                    </div>
+            <div class="row mt-4">
+                <div class="col-6">
+                    <strong>@(isVi ? "Đặt xe dễ dàng" : "Easy booking")</strong>
+                    <p class="text-muted small">@(isVi ? "Chọn và mở khóa chỉ với một lần bấm." : "Choose and unlock in one click.")</p>
+                </div>
+                <div class="col-6">
+                    <strong>@(isVi ? "Giá minh bạch" : "Transparent pricing")</strong>
+                    <p class="text-muted small">@(isVi ? "Tính tiền theo phút, xem biên lai ngay." : "Pay per minute, view receipts instantly.")</p>
                 </div>
             </div>
         </div>
+
+        <div class="hero-image-box">
+            <img class="hero-image" src="https://bizweb.dktcdn.net/100/066/626/products/trinx-khong-logo-2-of-2.jpg?v=1684825805130" alt="Rent a bike" />
+        </div>
     </div>
-</main>
+</div>

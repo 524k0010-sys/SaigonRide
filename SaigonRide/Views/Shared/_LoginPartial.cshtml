@@ -1,19 +1,23 @@
 ﻿@using Microsoft.AspNet.Identity
+@{
+    var langCookie = Request.Cookies["sr_lang"];
+    var isVi = langCookie != null && string.Equals(langCookie.Value, "vi", StringComparison.OrdinalIgnoreCase);
+}
 @if (Request.IsAuthenticated)
 {
     using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm" }))
     {
         @Html.AntiForgeryToken()
         <div class="d-flex align-items-center gap-3">
-            <span class="nav-link">Hello @User.Identity.GetUserName()!</span>
-            <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">Log off</a>
+            <span class="nav-link">@(isVi ? "Xin chào" : "Hello") @User.Identity.GetUserName()!</span>
+            <a class="nav-link" href="javascript:document.getElementById('logoutForm').submit()">@(isVi ? "Đăng xuất" : "Log off")</a>
         </div>
     }
 }
 else
 {
     <ul class="navbar-nav navbar-right">
-        <li>@Html.ActionLink("Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class="nav-link" })</li>
-        <li>@Html.ActionLink("Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class="nav-link" })</li>
+        <li>@Html.ActionLink(isVi ? "Đăng ký" : "Register", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class="nav-link" })</li>
+        <li>@Html.ActionLink(isVi ? "Đăng nhập" : "Log in", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class="nav-link" })</li>
     </ul>
 }

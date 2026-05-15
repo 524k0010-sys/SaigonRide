@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -73,29 +72,7 @@ namespace SaigonRide.Controllers
                 return View(model);
             }
 
-            // This doesn't count login failures towards account lockout
-            // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
-            // If user selected role choice, add user to that role for the session (only in-memory for demo)
-            // This demo does not persist role changes to the database. For production use, manage roles in Identity.
-            if (!string.IsNullOrEmpty(model.RoleChoice) && result == SignInStatus.Success)
-            {
-                // store chosen role in auth cookie claims so layout can show admin links
-                var user = await UserManager.FindByNameAsync(model.Email);
-                if (user != null)
-                {
-                    var identity = await UserManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
-                    // remove existing role claims
-                    var existingRole = identity.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role);
-                    if (existingRole != null)
-                    {
-                        identity.RemoveClaim(existingRole);
-                    }
-                    identity.AddClaim(new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, model.RoleChoice));
-                    AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
-                    AuthenticationManager.SignIn(new AuthenticationProperties { IsPersistent = model.RememberMe }, identity);
-                }
-            }
             switch (result)
             {
                 case SignInStatus.Success:
@@ -159,6 +136,7 @@ namespace SaigonRide.Controllers
         [AllowAnonymous]
         public ActionResult Register()
         {
+            ViewBag.UserTypes = GetUserTypeOptions();
             return View();
         }
 
@@ -171,10 +149,17 @@ namespace SaigonRide.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    UserType = NormalizeUserType(model.UserType)
+                };
+
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    await UserManager.AddToRoleAsync(user.Id, "User");
                     await SignInManager.SignInAsync(user, isPersistent:false, rememberBrowser:false);
                     
                     // For more information on how to enable account confirmation and password reset please visit https://go.microsoft.com/fwlink/?LinkID=320771
@@ -188,6 +173,7 @@ namespace SaigonRide.Controllers
                 AddErrors(result);
             }
 
+            ViewBag.UserTypes = GetUserTypeOptions(model.UserType);
             // If we got this far, something failed, redisplay form
             return View(model);
         }
@@ -387,7 +373,7 @@ namespace SaigonRide.Controllers
                 {
                     return View("ExternalLoginFailure");
                 }
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, UserType = "Local" };
                 var result = await UserManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
@@ -470,6 +456,23 @@ namespace SaigonRide.Controllers
                 return Redirect(returnUrl);
             }
             return RedirectToAction("Index", "Home");
+        }
+
+        private static string NormalizeUserType(string userType)
+        {
+            return string.Equals(userType, "Tourist", StringComparison.OrdinalIgnoreCase) ? "Tourist" : "Local";
+        }
+
+        private static SelectList GetUserTypeOptions(string selectedUserType = null)
+        {
+            var selected = NormalizeUserType(selectedUserType);
+            var options = new[]
+            {
+                new { Value = "Local", Text = "Local" },
+                new { Value = "Tourist", Text = "Tourist" }
+            };
+
+            return new SelectList(options, "Value", "Text", selected);
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

@@ -61,8 +61,6 @@ namespace SaigonRide.Models
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
 
-        [Display(Name = "Login as")]
-        public string RoleChoice { get; set; }
     }
 
     public class RegisterViewModel
@@ -71,6 +69,10 @@ namespace SaigonRide.Models
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
+
+        [Required]
+        [Display(Name = "User Type")]
+        public string UserType { get; set; }
 
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} characters long.", MinimumLength = 6)]

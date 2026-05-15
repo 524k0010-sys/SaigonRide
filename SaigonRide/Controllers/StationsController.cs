@@ -10,7 +10,7 @@ using SaigonRide.Models;
 
 namespace SaigonRide.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class StationsController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -111,6 +111,18 @@ namespace SaigonRide.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Station station = db.Stations.Find(id);
+            if (station == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (db.Vehicles.Any(v => v.StationId == id) ||
+                db.Rentals.Any(r => r.StartStationId == id || r.ReturnStationId == id))
+            {
+                TempData["Error"] = "Cannot delete this station because it is used by vehicles or rentals.";
+                return RedirectToAction("Index");
+            }
+
             db.Stations.Remove(station);
             db.SaveChanges();
             return RedirectToAction("Index");

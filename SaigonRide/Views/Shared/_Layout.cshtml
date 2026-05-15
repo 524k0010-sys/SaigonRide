@@ -1,13 +1,13 @@
 ﻿<!DOCTYPE html>
-<html>
+<html translate="no" class="notranslate">
 <head>
     <meta charset="utf-8" />
+    <meta name="google" content="notranslate" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>@ViewBag.Title - SaigonRide Admin</title>
+    <title>@ViewBag.Title - SaigonRide</title>
 
     @Styles.Render("~/Content/css")
-    <link href="@Url.Content("~/Content/Site.css")" rel="stylesheet" type="text/css" />
     @Scripts.Render("~/bundles/modernizr")
 
 </head>
@@ -15,13 +15,24 @@
     @{
         var currentController = Convert.ToString(ViewContext.RouteData.Values["controller"]);
         var currentAction = Convert.ToString(ViewContext.RouteData.Values["action"]);
+        var langCookie = Request.Cookies["sr_lang"];
+        var isVi = langCookie != null && string.Equals(langCookie.Value, "vi", StringComparison.OrdinalIgnoreCase);
+        var returnUrl = Request.RawUrl;
+        var isAdmin = Request.IsAuthenticated && User.IsInRole("Admin");
+        var isRentPage = currentController == "Rentals" && currentAction == "Available";
+        var isReturnPage = currentController == "Rentals" &&
+            (currentAction == "ReturnVehicles" ||
+             currentAction == "ReturnVehicle" ||
+             currentAction == "TripInProgress" ||
+             currentAction == "Checkout" ||
+             currentAction == "Success");
     }
 
     <nav class="navbar navbar-expand-lg saigon-navbar">
         <div class="container-fluid px-4">
             <a class="navbar-brand saigon-brand" href="@Url.Action("Index", "Home")">
                 <span class="brand-mark">SR</span>
-                <span>SaigonRide Admin</span>
+                <span>SaigonRide</span>
             </a>
 
             <button type="button"
@@ -38,47 +49,61 @@
                 <ul class="navbar-nav saigon-menu me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link saigon-link @(currentController == "Home" ? "active" : "")"
-                           href="@Url.Action("Index", "Home")">Home Page</a>
+                           href="@Url.Action("Index", "Home")">@(isVi ? "Trang chủ" : "Home")</a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Rentals" ? "active" : "")"
-                           href="@Url.Action("Available", "Rentals")">Rent Vehicle</a>
-                    </li>
-
-                    @* Tracking link restored *@
-                    <li class="nav-item">
-                        <a class="nav-link saigon-link @(currentController == "Vehicles" && currentAction == "Tracking" ? "active" : "")"
-                           href="@Url.Action("Tracking", "Vehicles")">Tracking</a>
-                    </li>
-
-                    @* show admin navigation links on the left when user is in Admin role to match user layout *@
-                    @if (Request.IsAuthenticated && User.IsInRole("Admin"))
+                    @if (!isAdmin)
                     {
                         <li class="nav-item">
-                            <a class="nav-link saigon-link @(currentController == "Vehicles" ? "active" : "")"
-                               href="@Url.Action("Index", "Vehicles")">Vehicles</a>
+                            <a class="nav-link saigon-link @(isRentPage ? "active" : "")"
+                               href="@Url.Action("Available", "Rentals")">@(isVi ? "Thuê xe" : "Rent Vehicle")</a>
+                        </li>
+
+                        if (Request.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link saigon-link @(isReturnPage ? "active" : "")"
+                                   href="@Url.Action("ReturnVehicles", "Rentals")">@(isVi ? "Trả xe" : "Return Vehicle")</a>
+                            </li>
+                        }
+                    }
+
+                    @if (isAdmin)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Vehicles" && currentAction == "Tracking" ? "active" : "")"
+                               href="@Url.Action("Tracking", "Vehicles")">@(isVi ? "Theo dõi" : "Tracking")</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link saigon-link @(currentController == "Vehicles" && currentAction != "Tracking" ? "active" : "")"
+                               href="@Url.Action("Index", "Vehicles")">@(isVi ? "Xe" : "Vehicles")</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link saigon-link @(currentController == "Stations" ? "active" : "")"
-                               href="@Url.Action("Index", "Stations")">Stations</a>
+                               href="@Url.Action("Index", "Stations")">@(isVi ? "Trạm" : "Stations")</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link saigon-link @(currentController == "VehicleCategories" ? "active" : "")"
-                               href="@Url.Action("Index", "VehicleCategories")">Categories</a>
+                               href="@Url.Action("Index", "VehicleCategories")">@(isVi ? "Loại xe" : "Categories")</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Inventory" ? "active" : "")"
-                               href="@Url.Action("Inventory", "Reports")">Inventory</a>
+                               href="@Url.Action("Inventory", "Reports")">@(isVi ? "Tồn kho" : "Inventory")</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link saigon-link @(currentController == "Reports" && currentAction == "Revenue" ? "active" : "")"
-                               href="@Url.Action("Revenue", "Reports")">Revenue</a>
+                               href="@Url.Action("Revenue", "Reports")">@(isVi ? "Doanh thu" : "Revenue")</a>
                         </li>
                     }
                 </ul>
             </div>
-            <div class="d-flex align-items-center ms-auto">
+            <div class="language-toggle me-3" role="group" aria-label="Language">
+                <a class="lang-option @(isVi ? "" : "active")"
+                   href="@Url.Action("SetLanguage", "Home", new { lang = "en", returnUrl = returnUrl })">EN</a>
+                <a class="lang-option @(isVi ? "active" : "")"
+                   href="@Url.Action("SetLanguage", "Home", new { lang = "vi", returnUrl = returnUrl })">VI</a>
+            </div>
+            <div class="d-flex align-items-center saigon-login">
                 @Html.Partial("_LoginPartial")
             </div>
         </div>
@@ -91,7 +116,7 @@
 
                 <footer class="saigon-footer">
                     <span>&copy; @DateTime.Now.Year SaigonRide</span>
-                    <span>Distributed Vehicle Rental System</span>
+                    <span>@(isVi ? "Hệ thống thuê xe phân tán" : "Distributed Vehicle Rental System")</span>
                 </footer>
             </div>
         </div>
@@ -99,6 +124,332 @@
 
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
+    <script>
+        (function () {
+            var toVi = {
+                "Home": "Trang chủ",
+                "Home Page": "Trang chủ",
+                "Rent Vehicle": "Thuê xe",
+                "Return Vehicle": "Trả xe",
+                "Tracking": "Theo dõi",
+                "Vehicles": "Xe",
+                "Stations": "Trạm",
+                "Categories": "Loại xe",
+                "Inventory": "Tồn kho",
+                "Revenue": "Doanh thu",
+                "Log in": "Đăng nhập",
+                "Log in.": "Đăng nhập.",
+                "Register": "Đăng ký",
+                "Register.": "Đăng ký.",
+                "Use a local account to log in.": "Sử dụng tài khoản nội bộ để đăng nhập.",
+                "Create a new account.": "Tạo tài khoản mới.",
+                "Register as a new user": "Đăng ký người dùng mới",
+                "Email": "Email",
+                "User Type": "Loại người dùng",
+                "Local": "Khách địa phương",
+                "Tourist": "Khách du lịch",
+                "Password": "Mật khẩu",
+                "Confirm password": "Xác nhận mật khẩu",
+                "Remember me?": "Ghi nhớ đăng nhập?",
+                "Available Vehicles": "Xe có sẵn",
+                "Select a ready vehicle to start a rental trip.": "Chọn một xe sẵn sàng để bắt đầu chuyến đi.",
+                "Vehicle Code": "Mã xe",
+                "Vehicle Code / Prefix": "Mã xe / tiền tố",
+                "If quantity is greater than 1, codes will be created as PREFIX-001, PREFIX-002, ...": "Nếu số lượng lớn hơn 1, mã xe sẽ được tạo dạng PREFIX-001, PREFIX-002, ...",
+                "Quantity": "Số lượng",
+                "Vehicle": "Xe",
+                "Vehicle:": "Xe:",
+                "Category": "Loại xe",
+                "Category:": "Loại xe:",
+                "Price / Minute": "Giá / phút",
+                "Station": "Trạm",
+                "Status": "Trạng thái",
+                "Action": "Thao tác",
+                "Ready": "Sẵn sàng",
+                "Start Trip": "Bắt đầu chuyến",
+                "Trip In Progress": "Chuyến đi đang diễn ra",
+                "Start Station": "Trạm bắt đầu",
+                "Start Station:": "Trạm bắt đầu:",
+                "Start Time": "Giờ bắt đầu",
+                "Start Time:": "Giờ bắt đầu:",
+                "Viewing as Admin": "Đang xem với quyền Admin",
+                "Viewing as Customer": "Đang xem với quyền khách hàng",
+                "Admin Return": "Admin trả xe",
+                "Checkout": "Thanh toán",
+                "Review the calculated fare and confirm the payment method.": "Xem lại tiền thuê đã tính và xác nhận phương thức thanh toán.",
+                "Trip Summary": "Tóm tắt chuyến đi",
+                "Return Station": "Trạm trả xe",
+                "Duration": "Thời lượng",
+                "Base Fare": "Giá gốc",
+                "Discount": "Giảm giá",
+                "Total Fare": "Tổng tiền",
+                "Payment": "Thanh toán",
+                "User Type:": "Loại người dùng:",
+                "Choose payment method": "Chọn phương thức thanh toán",
+                "Confirm Payment": "Xác nhận thanh toán",
+                "Payment Successful": "Thanh toán thành công",
+                "The rental trip has been completed and the vehicle is ready for the next user.": "Chuyến thuê đã hoàn tất và xe đã sẵn sàng cho người dùng tiếp theo.",
+                "Receipt": "Biên lai",
+                "Payment Method": "Phương thức thanh toán",
+                "Amount": "Số tiền",
+                "Paid At": "Thanh toán lúc",
+                "Rent Another Vehicle": "Thuê xe khác",
+                "View Revenue Report": "Xem báo cáo doanh thu",
+                "My Rentals": "Chuyến của tôi",
+                "All Rentals (Admin)": "Tất cả chuyến thuê (Admin)",
+                "List of current and past rentals.": "Danh sách các chuyến thuê hiện tại và trước đây.",
+                "End Time": "Giờ kết thúc",
+                "In progress": "Đang diễn ra",
+                "In transit": "Đang di chuyển",
+                "Completed": "Hoàn tất",
+                "Return": "Trả xe",
+                "Trả xe đang thuê": "Trả xe đang thuê",
+                "Danh sách xe đang được thuê bằng tài khoản của bạn.": "Danh sách xe đang được thuê bằng tài khoản của bạn.",
+                "Bạn chưa có xe nào đang thuê.": "Bạn chưa có xe nào đang thuê.",
+                "Khi bạn bắt đầu một chuyến đi, xe đó sẽ xuất hiện tại đây để trả xe nhanh.": "Khi bạn bắt đầu một chuyến đi, xe đó sẽ xuất hiện tại đây để trả xe nhanh.",
+                "Thuê xe ngay": "Thuê xe ngay",
+                "Mã xe": "Mã xe",
+                "Loại xe": "Loại xe",
+                "Trạm bắt đầu": "Trạm bắt đầu",
+                "Giờ bắt đầu": "Giờ bắt đầu",
+                "Thời gian đang đi": "Thời gian đang đi",
+                "Trạng thái": "Trạng thái",
+                "Đang thuê": "Đang thuê",
+                "Trả xe": "Trả xe",
+                "Chi tiết": "Chi tiết",
+                "Kết thúc chuyến đi": "Kết thúc chuyến đi",
+                "Xác nhận trả xe": "Xác nhận trả xe",
+                "Mã xe": "Mã xe",
+                "Giờ bắt đầu": "Giờ bắt đầu",
+                "Đơn giá": "Đơn giá",
+                "Thời gian đã đi": "Thời gian đã đi",
+                "Chọn trạm bạn đang đứng để trả xe:": "Chọn trạm bạn đang đứng để trả xe:",
+                "* Bạn phải trả xe tại trạm để kết thúc tính phí.": "* Bạn phải trả xe tại trạm để kết thúc tính phí.",
+                "Xác nhận trả xe & Thanh toán": "Xác nhận trả xe & Thanh toán",
+                "Hủy bỏ": "Hủy bỏ",
+                "Station Inventory Report": "Báo cáo tồn kho trạm",
+                "Monitor station capacity, utilization, and vehicle readiness.": "Theo dõi sức chứa trạm, mức sử dụng và trạng thái sẵn sàng của xe.",
+                "Capacity": "Sức chứa",
+                "Current Inventory": "Tồn kho hiện tại",
+                "Utilization %": "Mức sử dụng %",
+                "Ready Vehicles": "Xe sẵn sàng",
+                "Maintenance Vehicles": "Xe bảo trì",
+                "Revenue Report": "Báo cáo doanh thu",
+                "Revenue by Vehicle Category": "Doanh thu theo loại xe",
+                "Review completed rentals and simulated payment revenue by category.": "Xem các chuyến đã hoàn tất và doanh thu thanh toán mô phỏng theo loại xe.",
+                "Vehicle Category": "Loại xe",
+                "Total Rentals": "Tổng chuyến thuê",
+                "Total Revenue": "Tổng doanh thu",
+                "Manage vehicle codes, categories, stations, and operating status.": "Quản lý mã xe, loại xe, trạm và trạng thái vận hành.",
+                "Create New": "Tạo mới",
+                "Create": "Tạo",
+                "Save": "Lưu",
+                "Back to List": "Quay lại danh sách",
+                "Are you sure you want to delete this?": "Bạn có chắc muốn xóa mục này không?",
+                "Edit": "Sửa",
+                "Details": "Chi tiết",
+                "Delete": "Xóa",
+                "Name": "Tên",
+                "Price Per Minute": "Giá mỗi phút",
+                "PricePerMinute": "Giá mỗi phút",
+                "VehicleCategoryId": "Loại xe",
+                "StationId": "Trạm",
+                "Vehicle Tracking": "Theo dõi xe",
+                "Filter vehicles by station and operating status.": "Lọc xe theo trạm và trạng thái vận hành.",
+                "All statuses": "Tất cả trạng thái",
+                "All stations": "Tất cả trạm",
+                "Filter": "Lọc",
+                "Last Activity": "Hoạt động gần nhất",
+                "InTransit": "Đang di chuyển",
+                "Maintenance": "Bảo trì",
+                "Reserved": "Đã giữ chỗ",
+                "Manage station capacity and current docked inventory.": "Quản lý sức chứa trạm và số xe đang đỗ.",
+                "Vehicle Categories": "Loại xe",
+                "Manage rental rates for standard bikes and e-scooters.": "Quản lý đơn giá thuê cho xe đạp và e-scooter.",
+                "Please finish and pay for your current trip before starting another one.": "Vui lòng kết thúc và thanh toán chuyến hiện tại trước khi bắt đầu chuyến mới.",
+                "Vehicle not found.": "Không tìm thấy xe.",
+                "This vehicle is not available.": "Xe này hiện không khả dụng.",
+                "This station is full. Please choose another return station.": "Trạm này đã đầy. Vui lòng chọn trạm trả xe khác.",
+                "Please return the vehicle before checkout.": "Vui lòng trả xe trước khi thanh toán.",
+                "One or more vehicle codes already exist.": "Một hoặc nhiều mã xe đã tồn tại.",
+                "This station does not have enough capacity for that many vehicles.": "Trạm này không đủ chỗ cho số lượng xe đó.",
+                "Quantity must be at least 1.": "Số lượng phải ít nhất là 1.",
+                "You can create up to 100 vehicles at a time.": "Bạn chỉ có thể tạo tối đa 100 xe mỗi lần.",
+                "Vehicle code is required.": "Vui lòng nhập mã xe.",
+                "Unable to start trip.": "Không thể bắt đầu chuyến đi.",
+                "Unable to start trip (network error).": "Không thể bắt đầu chuyến đi do lỗi kết nối."
+            };
+
+            var toEn = {
+                "Trang chủ": "Home",
+                "Thuê xe": "Rent Vehicle",
+                "Trả xe": "Return Vehicle",
+                "Theo dõi": "Tracking",
+                "Xe": "Vehicles",
+                "Trạm": "Stations",
+                "Loại xe": "Categories",
+                "Tồn kho": "Inventory",
+                "Doanh thu": "Revenue",
+                "Hệ thống thuê xe phân tán": "Distributed Vehicle Rental System",
+                "Trả xe đang thuê": "Active Rentals to Return",
+                "Danh sách xe đang được thuê bằng tài khoản của bạn.": "Vehicles currently rented by your account.",
+                "Bạn chưa có xe nào đang thuê.": "You do not have any active rentals.",
+                "Khi bạn bắt đầu một chuyến đi, xe đó sẽ xuất hiện tại đây để trả xe nhanh.": "When you start a trip, that vehicle will appear here for quick return.",
+                "Thuê xe ngay": "Rent now",
+                "Mã xe": "Vehicle Code",
+                "Mã xe / tiền tố": "Vehicle Code / Prefix",
+                "Nếu số lượng lớn hơn 1, mã xe sẽ được tạo dạng PREFIX-001, PREFIX-002, ...": "If quantity is greater than 1, codes will be created as PREFIX-001, PREFIX-002, ...",
+                "Số lượng": "Quantity",
+                "Loại xe": "Category",
+                "Trạm bắt đầu": "Start Station",
+                "Giờ bắt đầu": "Start Time",
+                "Thời gian đang đi": "Current Duration",
+                "Trạng thái": "Status",
+                "Đang thuê": "Active",
+                "Chi tiết": "Details",
+                "Kết thúc chuyến đi": "End Trip",
+                "Xác nhận trả xe": "Confirm Return",
+                "Đơn giá": "Rate",
+                "Thời gian đã đi": "Duration",
+                "Chọn trạm bạn đang đứng để trả xe:": "Choose your return station:",
+                "* Bạn phải trả xe tại trạm để kết thúc tính phí.": "* Return the vehicle at a station to stop fare calculation.",
+                "Xác nhận trả xe & Thanh toán": "Confirm Return & Checkout",
+                "Hủy bỏ": "Cancel",
+                "Đang xem với quyền Admin": "Viewing as Admin",
+                "Đang xem với quyền khách hàng": "Viewing as Customer",
+                "Admin trả xe": "Admin Return",
+                "Đăng nhập": "Log in",
+                "Đăng nhập.": "Log in.",
+                "Đăng ký": "Register",
+                "Đăng ký.": "Register.",
+                "Sử dụng tài khoản nội bộ để đăng nhập.": "Use a local account to log in.",
+                "Tạo tài khoản mới.": "Create a new account.",
+                "Đăng ký người dùng mới": "Register as a new user",
+                "Mật khẩu": "Password",
+                "Loại người dùng": "User Type",
+                "Khách địa phương": "Local",
+                "Khách du lịch": "Tourist",
+                "Xác nhận mật khẩu": "Confirm password",
+                "Ghi nhớ đăng nhập?": "Remember me?",
+                "Xe có sẵn": "Available Vehicles",
+                "Chọn một xe sẵn sàng để bắt đầu chuyến đi.": "Select a ready vehicle to start a rental trip.",
+                "Giá / phút": "Price / Minute",
+                "Thao tác": "Action",
+                "Sẵn sàng": "Ready",
+                "Bắt đầu chuyến": "Start Trip",
+                "Chuyến đi đang diễn ra": "Trip In Progress",
+                "Thanh toán": "Checkout",
+                "Tóm tắt chuyến đi": "Trip Summary",
+                "Trạm trả xe": "Return Station",
+                "Thời lượng": "Duration",
+                "Giá gốc": "Base Fare",
+                "Giảm giá": "Discount",
+                "Tổng tiền": "Total Fare",
+                "Loại người dùng:": "User Type:",
+                "Chọn phương thức thanh toán": "Choose payment method",
+                "Xác nhận thanh toán": "Confirm Payment",
+                "Thanh toán thành công": "Payment Successful",
+                "Biên lai": "Receipt",
+                "Phương thức thanh toán": "Payment Method",
+                "Số tiền": "Amount",
+                "Thanh toán lúc": "Paid At",
+                "Thuê xe khác": "Rent Another Vehicle",
+                "Xem báo cáo doanh thu": "View Revenue Report",
+                "Chuyến của tôi": "My Rentals",
+                "Tất cả chuyến thuê (Admin)": "All Rentals (Admin)",
+                "Giờ kết thúc": "End Time",
+                "Đang diễn ra": "In progress",
+                "Đang di chuyển": "In transit",
+                "Hoàn tất": "Completed",
+                "Báo cáo tồn kho trạm": "Station Inventory Report",
+                "Sức chứa": "Capacity",
+                "Tồn kho hiện tại": "Current Inventory",
+                "Mức sử dụng %": "Utilization %",
+                "Xe sẵn sàng": "Ready Vehicles",
+                "Xe bảo trì": "Maintenance Vehicles",
+                "Báo cáo doanh thu": "Revenue Report",
+                "Doanh thu theo loại xe": "Revenue by Vehicle Category",
+                "Tổng chuyến thuê": "Total Rentals",
+                "Tổng doanh thu": "Total Revenue",
+                "Tạo mới": "Create New",
+                "Tạo": "Create",
+                "Lưu": "Save",
+                "Quay lại danh sách": "Back to List",
+                "Bạn có chắc muốn xóa mục này không?": "Are you sure you want to delete this?",
+                "Sửa": "Edit",
+                "Xóa": "Delete",
+                "Tên": "Name",
+                "Giá mỗi phút": "Price Per Minute",
+                "Theo dõi xe": "Vehicle Tracking",
+                "Tất cả trạng thái": "All statuses",
+                "Tất cả trạm": "All stations",
+                "Lọc": "Filter",
+                "Hoạt động gần nhất": "Last Activity",
+                "Bảo trì": "Maintenance",
+                "Đã giữ chỗ": "Reserved"
+            };
+
+            var translations = @((isVi ? "true" : "false")) ? toVi : toEn;
+
+            function translateValue(value) {
+                if (!value) {
+                    return value;
+                }
+
+                var trimmed = value.trim();
+                return translations[trimmed] || value;
+            }
+
+            function translateTextNode(node) {
+                var value = node.nodeValue;
+                var trimmed = value.trim();
+                var translated = translations[trimmed];
+
+                if (translated) {
+                    node.nodeValue = value.replace(trimmed, translated);
+                }
+            }
+
+            function walk(root) {
+                var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+                    acceptNode: function (node) {
+                        var parent = node.parentNode;
+                        if (!parent || /^(SCRIPT|STYLE|TEXTAREA)$/i.test(parent.nodeName)) {
+                            return NodeFilter.FILTER_REJECT;
+                        }
+
+                        return node.nodeValue.trim() ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                    }
+                });
+
+                var nodes = [];
+                while (walker.nextNode()) {
+                    nodes.push(walker.currentNode);
+                }
+
+                nodes.forEach(translateTextNode);
+            }
+
+            walk(document.body);
+
+            document.querySelectorAll("input[type='submit'], input[type='button']").forEach(function (input) {
+                input.value = translateValue(input.value);
+            });
+
+            document.querySelectorAll("[placeholder]").forEach(function (element) {
+                element.setAttribute("placeholder", translateValue(element.getAttribute("placeholder")));
+            });
+
+            var titleSuffix = " - SaigonRide";
+            if (document.title.indexOf(titleSuffix) > -1) {
+                var rawTitle = document.title.replace(titleSuffix, "");
+                var translatedTitle = translations[rawTitle];
+                if (translatedTitle) {
+                    document.title = translatedTitle + titleSuffix;
+                }
+            }
+        })();
+    </script>
     @RenderSection("scripts", required: false)
 </body>
 </html>

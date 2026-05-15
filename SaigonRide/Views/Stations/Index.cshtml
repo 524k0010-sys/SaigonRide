@@ -1,14 +1,23 @@
 ﻿@model IEnumerable<SaigonRide.Models.Station>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Stations";
 }
 
-<h2>Index</h2>
+<div class="admin-page-header">
+    <h2>Stations</h2>
+    <p>Manage station capacity and current docked inventory.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-success" })
 </p>
+<div class="table-responsive">
 <table class="table">
     <tr>
         <th>
@@ -43,3 +52,4 @@
 }
 
 </table>
+</div>

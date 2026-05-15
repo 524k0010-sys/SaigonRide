@@ -1,14 +1,23 @@
 ﻿@model IEnumerable<SaigonRide.Models.VehicleCategory>
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Vehicle Categories";
 }
 
-<h2>Index</h2>
+<div class="admin-page-header">
+    <h2>Vehicle Categories</h2>
+    <p>Manage rental rates for standard bikes and e-scooters.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <p>
-    @Html.ActionLink("Create New", "Create")
+    @Html.ActionLink("Create New", "Create", null, new { @class = "btn btn-success" })
 </p>
+<div class="table-responsive">
 <table class="table">
     <tr>
         <th>
@@ -37,3 +46,4 @@
 }
 
 </table>
+</div>

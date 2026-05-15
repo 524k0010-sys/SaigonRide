@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
@@ -37,53 +38,62 @@ namespace SaigonRide.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult StartTrip(int id, string returnTo = null)
         {
-            var vehicle = db.Vehicles
-                .Include(v => v.Station)
-                .FirstOrDefault(v => v.Id == id);
-
-            if (vehicle == null)
+            var currentUserId = User.Identity.GetUserId();
+            if (HasUnfinishedRental(currentUserId))
             {
-                TempData["Error"] = "Vehicle not found.";
-                return RedirectToAction("Available");
+                return TripStartError("Please finish and pay for your current trip before starting another one.");
             }
 
-            if (vehicle.Status != VehicleStatus.Ready)
+            Rental rental;
+            Vehicle vehicle;
+
+            using (var transaction = db.Database.BeginTransaction(IsolationLevel.Serializable))
             {
-                TempData["Error"] = "This vehicle is not available.";
-                return RedirectToAction("Available");
+                vehicle = db.Vehicles
+                    .Include(v => v.Station)
+                    .FirstOrDefault(v => v.Id == id);
+
+                if (vehicle == null)
+                {
+                    return TripStartError("Vehicle not found.");
+                }
+
+                if (vehicle.Status != VehicleStatus.Ready)
+                {
+                    return TripStartError("This vehicle is not available.");
+                }
+
+                var station = db.Stations.Find(vehicle.StationId);
+
+                rental = new Rental
+                {
+                    UserId = currentUserId,
+                    VehicleId = vehicle.Id,
+                    StartStationId = vehicle.StationId,
+                    StartTime = DateTime.Now,
+                    Status = RentalStatus.Active
+                };
+
+                vehicle.Status = VehicleStatus.InTransit;
+
+                db.Entry(vehicle).State = EntityState.Modified;
+
+                if (station != null && station.CurrentInventory > 0)
+                {
+                    station.CurrentInventory -= 1;
+                    db.Entry(station).State = EntityState.Modified;
+                }
+
+                db.Rentals.Add(rental);
+                db.SaveChanges();
+                transaction.Commit();
             }
 
-            var station = db.Stations.Find(vehicle.StationId);
-
-            var rental = new Rental
-            {
-                UserId = User.Identity.GetUserId(),
-                VehicleId = vehicle.Id,
-                StartStationId = vehicle.StationId,
-                StartTime = DateTime.Now
-            };
-
-            vehicle.Status = VehicleStatus.InTransit;
-
-            // ensure vehicle status update is tracked
-            db.Entry(vehicle).State = EntityState.Modified;
-
-            if (station != null && station.CurrentInventory > 0)
-            {
-                station.CurrentInventory -= 1;
-                db.Entry(station).State = EntityState.Modified;
-            }
-
-            db.Rentals.Add(rental);
-            db.SaveChanges();
-
-            // If called via AJAX, return JSON so client can update UI immediately.
             if (Request.IsAjaxRequest())
             {
                 return Json(new { success = true, rentalId = rental.Id });
             }
 
-            // If caller requested to be returned to Vehicles index or Available (rent) page, handle those
             if (!string.IsNullOrEmpty(returnTo))
             {
                 if (returnTo.Equals("vehicles", StringComparison.OrdinalIgnoreCase))
@@ -101,7 +111,6 @@ namespace SaigonRide.Controllers
                 }
             }
 
-            // After starting a trip show an in-progress page. Customers can end trip; admins have admin return controls.
             return RedirectToAction("TripInProgress", new { id = rental.Id });
         }
 
@@ -130,6 +139,11 @@ namespace SaigonRide.Controllers
                 return new HttpUnauthorizedResult();
             }
 
+            if (rental.EndTime.HasValue)
+            {
+                return RedirectToCheckoutOrSuccess(rental.Id, "Local");
+            }
+
             return View(rental);
         }
 
@@ -143,6 +157,16 @@ namespace SaigonRide.Controllers
             if (rental == null)
             {
                 return HttpNotFound();
+            }
+
+            if (!CanAccessRental(rental))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            if (rental.EndTime.HasValue)
+            {
+                return RedirectToCheckoutOrSuccess(rental.Id, "Local");
             }
 
             var model = new EndTripViewModel
@@ -173,6 +197,16 @@ namespace SaigonRide.Controllers
                 return HttpNotFound();
             }
 
+            if (!CanAccessRental(rental))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            if (rental.EndTime.HasValue)
+            {
+                return RedirectToCheckoutOrSuccess(rental.Id, model.UserType);
+            }
+
             if (returnStation.CurrentInventory >= returnStation.Capacity)
             {
                 ModelState.AddModelError("ReturnStationId", "This station is full. Please choose another return station.");
@@ -200,6 +234,7 @@ namespace SaigonRide.Controllers
             rental.BaseFare = baseFare;
             rental.DiscountAmount = discount;
             rental.TotalFare = totalFare;
+            rental.Status = RentalStatus.Active;
 
             db.SaveChanges();
 
@@ -218,21 +253,17 @@ namespace SaigonRide.Controllers
                 return HttpNotFound();
             }
 
-            var duration = (int)Math.Ceiling((rental.EndTime.Value - rental.StartTime).TotalMinutes);
-
-            var model = new CheckoutViewModel
+            if (!CanAccessRental(rental))
             {
-                RentalId = rental.Id,
-                VehicleCode = rental.Vehicle.VehicleCode,
-                VehicleCategory = rental.Vehicle.VehicleCategory.Name,
-                ReturnStationName = rental.ReturnStation.Name,
-                UserType = string.IsNullOrEmpty(userType) ? "Local" : userType,
-                DurationMinutes = duration,
-                BaseFare = rental.BaseFare,
-                DiscountAmount = rental.DiscountAmount,
-                TotalFare = rental.TotalFare,
-                PaymentMethods = GetPaymentOptions(userType)
-            };
+                return new HttpUnauthorizedResult();
+            }
+
+            if (!rental.EndTime.HasValue)
+            {
+                return RedirectToAction("TripInProgress", new { id = rental.Id });
+            }
+
+            var model = BuildCheckoutViewModel(rental, GetRentalUserType(rental));
 
             return View(model);
         }
@@ -243,7 +274,7 @@ namespace SaigonRide.Controllers
         {
             // load rental together with its vehicle and return station to ensure updates are tracked
             var rental = db.Rentals
-                .Include(r => r.Vehicle)
+                .Include(r => r.Vehicle.VehicleCategory)
                 .Include(r => r.ReturnStation)
                 .FirstOrDefault(r => r.Id == model.RentalId);
 
@@ -252,7 +283,25 @@ namespace SaigonRide.Controllers
                 return HttpNotFound();
             }
 
-            var allowedMethods = GetAllowedPaymentMethods(model.UserType);
+            if (!CanAccessRental(rental))
+            {
+                return new HttpUnauthorizedResult();
+            }
+
+            var existingPayment = db.Payments.FirstOrDefault(p => p.RentalId == rental.Id && p.Status == PaymentStatus.Success);
+            if (existingPayment != null)
+            {
+                return RedirectToAction("Success", new { id = rental.Id });
+            }
+
+            if (!rental.EndTime.HasValue || rental.ReturnStation == null)
+            {
+                TempData["Error"] = "Please return the vehicle before checkout.";
+                return RedirectToAction("ReturnVehicle", new { id = rental.Id });
+            }
+
+            var normalizedUserType = GetRentalUserType(rental);
+            var allowedMethods = GetAllowedPaymentMethods(normalizedUserType);
 
             if (!allowedMethods.Contains(model.PaymentMethod))
             {
@@ -261,15 +310,26 @@ namespace SaigonRide.Controllers
 
             if (!ModelState.IsValid)
             {
-                model.PaymentMethods = GetPaymentOptions(model.UserType);
-                return View("Checkout", model);
+                var checkoutModel = BuildCheckoutViewModel(rental, normalizedUserType);
+                checkoutModel.PaymentMethod = model.PaymentMethod;
+                return View("Checkout", checkoutModel);
+            }
+
+            var gateway = new PaymentGatewayService();
+            var result = gateway.Pay(model.PaymentMethod, rental.Id, rental.TotalFare);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("PaymentMethod", result.Message);
+                var checkoutModel = BuildCheckoutViewModel(rental, normalizedUserType);
+                checkoutModel.PaymentMethod = model.PaymentMethod;
+                return View("Checkout", checkoutModel);
             }
 
             var payment = new Payment
             {
                 RentalId = rental.Id,
                 Method = model.PaymentMethod,
-                Status = PaymentStatus.Success,
+                Status = result.Status,
                 Amount = rental.TotalFare,
                 PaidAt = DateTime.Now
             };
@@ -296,6 +356,7 @@ namespace SaigonRide.Controllers
                 db.Entry(vehicle).State = EntityState.Modified;
             }
 
+            rental.Status = RentalStatus.Completed;
             db.Payments.Add(payment);
             db.SaveChanges();
 
@@ -307,11 +368,16 @@ namespace SaigonRide.Controllers
             var payment = db.Payments
                 .Include(p => p.Rental.Vehicle.VehicleCategory)
                 .Include(p => p.Rental.ReturnStation)
-                .FirstOrDefault(p => p.RentalId == id);
+                .FirstOrDefault(p => p.RentalId == id && p.Status == PaymentStatus.Success);
 
             if (payment == null)
             {
                 return HttpNotFound();
+            }
+
+            if (!CanAccessRental(payment.Rental))
+            {
+                return new HttpUnauthorizedResult();
             }
 
             return View(payment);
@@ -341,6 +407,24 @@ namespace SaigonRide.Controllers
             return View(rentals.OrderByDescending(r => r.StartTime).ToList());
         }
 
+        // GET: Rentals/ReturnVehicles
+        public ActionResult ReturnVehicles()
+        {
+            var currentUserId = User.Identity.GetUserId();
+
+            var rentals = db.Rentals
+                .Include(r => r.Vehicle.VehicleCategory)
+                .Include(r => r.StartStation)
+                .Where(r =>
+                    r.UserId == currentUserId &&
+                    !r.EndTime.HasValue &&
+                    r.Status != RentalStatus.Cancelled)
+                .OrderByDescending(r => r.StartTime)
+                .ToList();
+
+            return View(rentals);
+        }
+
         // GET: Rentals/ReturnVehicle/5
         public ActionResult ReturnVehicle(int id)
         {
@@ -358,6 +442,11 @@ namespace SaigonRide.Controllers
             if (!User.IsInRole("Admin") && rental.UserId != User.Identity.GetUserId())
             {
                 return new HttpUnauthorizedResult();
+            }
+
+            if (rental.EndTime.HasValue)
+            {
+                return RedirectToCheckoutOrSuccess(rental.Id, "Local");
             }
 
             ViewBag.Stations = new SelectList(db.Stations.OrderBy(s => s.Name).ToList(), "Id", "Name");
@@ -386,6 +475,11 @@ namespace SaigonRide.Controllers
                 return new HttpUnauthorizedResult();
             }
 
+            if (rental.EndTime.HasValue)
+            {
+                return RedirectToCheckoutOrSuccess(rental.Id, "Local");
+            }
+
             if (returnStation.CurrentInventory >= returnStation.Capacity)
             {
                 TempData["Error"] = "This station is full. Please choose another return station.";
@@ -409,11 +503,90 @@ namespace SaigonRide.Controllers
             rental.BaseFare = baseFare;
             rental.DiscountAmount = discount;
             rental.TotalFare = totalFare;
+            rental.Status = RentalStatus.Active;
 
             db.SaveChanges();
 
             // redirect to checkout where payment is confirmed
-            return RedirectToAction("Checkout", new { id = rental.Id, userType = "Local" });
+            return RedirectToAction("Checkout", new { id = rental.Id });
+        }
+
+        private bool CanAccessRental(Rental rental)
+        {
+            return rental != null && (User.IsInRole("Admin") || rental.UserId == User.Identity.GetUserId());
+        }
+
+        private bool HasUnfinishedRental(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return false;
+            }
+
+            return db.Rentals.Any(r =>
+                r.UserId == userId &&
+                r.Status != RentalStatus.Cancelled &&
+                (!r.EndTime.HasValue ||
+                 !db.Payments.Any(p => p.RentalId == r.Id && p.Status == PaymentStatus.Success)));
+        }
+
+        private ActionResult TripStartError(string message)
+        {
+            if (Request.IsAjaxRequest())
+            {
+                return Json(new { success = false, message });
+            }
+
+            TempData["Error"] = message;
+            return RedirectToAction("Available");
+        }
+
+        private ActionResult RedirectToCheckoutOrSuccess(int rentalId, string userType)
+        {
+            if (db.Payments.Any(p => p.RentalId == rentalId && p.Status == PaymentStatus.Success))
+            {
+                return RedirectToAction("Success", new { id = rentalId });
+            }
+
+            return RedirectToAction("Checkout", new { id = rentalId });
+        }
+
+        private CheckoutViewModel BuildCheckoutViewModel(Rental rental, string userType)
+        {
+            var normalizedUserType = NormalizeUserType(userType);
+            var duration = rental.EndTime.HasValue
+                ? (int)Math.Ceiling((rental.EndTime.Value - rental.StartTime).TotalMinutes)
+                : 0;
+
+            return new CheckoutViewModel
+            {
+                RentalId = rental.Id,
+                VehicleCode = rental.Vehicle?.VehicleCode,
+                VehicleCategory = rental.Vehicle?.VehicleCategory?.Name,
+                ReturnStationName = rental.ReturnStation?.Name,
+                UserType = normalizedUserType,
+                DurationMinutes = duration,
+                BaseFare = rental.BaseFare,
+                DiscountAmount = rental.DiscountAmount,
+                TotalFare = rental.TotalFare,
+                PaymentMethods = GetPaymentOptions(normalizedUserType)
+            };
+        }
+
+        private string NormalizeUserType(string userType)
+        {
+            return string.Equals(userType, "Tourist", StringComparison.OrdinalIgnoreCase) ? "Tourist" : "Local";
+        }
+
+        private string GetRentalUserType(Rental rental)
+        {
+            if (rental == null || string.IsNullOrWhiteSpace(rental.UserId))
+            {
+                return "Local";
+            }
+
+            var user = db.Users.Find(rental.UserId);
+            return NormalizeUserType(user?.UserType);
         }
 
         private IEnumerable<SelectListItem> GetStationOptions()
@@ -430,7 +603,7 @@ namespace SaigonRide.Controllers
 
         private List<PaymentMethod> GetAllowedPaymentMethods(string userType)
         {
-            if (userType == "Tourist")
+            if (NormalizeUserType(userType) == "Tourist")
             {
                 return new List<PaymentMethod>
                 {

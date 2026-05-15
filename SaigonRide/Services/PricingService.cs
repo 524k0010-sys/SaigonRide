@@ -12,12 +12,22 @@ namespace SaigonRide.Services
                 throw new ArgumentException("End time must be after start time.");
             }
 
+            if (pricePerMinute <= 0)
+            {
+                throw new ArgumentException("Price per minute must be greater than zero.");
+            }
+
             var minutes = Math.Ceiling((endTime - startTime).TotalMinutes);
             return (decimal)minutes * pricePerMinute;
         }
 
         public bool IsLowInventoryStation(Station station)
         {
+            if (station == null)
+            {
+                return false;
+            }
+
             if (station.Capacity <= 0)
             {
                 return false;
@@ -29,12 +39,17 @@ namespace SaigonRide.Services
 
         public decimal CalculateDiscount(decimal baseFare, Station returnStation)
         {
+            if (baseFare <= 0)
+            {
+                return 0;
+            }
+
             return IsLowInventoryStation(returnStation) ? baseFare * 0.15m : 0;
         }
 
         public decimal CalculateTotalFare(decimal baseFare, decimal discount)
         {
-            return baseFare - discount;
+            return Math.Max(0, baseFare - discount);
         }
     }
 }

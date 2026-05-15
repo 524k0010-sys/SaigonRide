@@ -195,6 +195,10 @@
     <Compile Include="Migrations\202605051742227_Update_For_RentalStatus.Designer.cs">
       <DependentUpon>202605051742227_Update_For_RentalStatus.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605151723022_AddUserTypeToUsers.cs" />
+    <Compile Include="Migrations\202605151723022_AddUserTypeToUsers.Designer.cs">
+      <DependentUpon>202605151723022_AddUserTypeToUsers.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -209,6 +213,7 @@
     <Compile Include="Models\VehicleCategory.cs" />
     <Compile Include="Models\VehicleStatus.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\PaymentGatewayService.cs" />
     <Compile Include="Services\PricingService.cs" />
     <Compile Include="Services\ReportService.cs" />
     <Compile Include="Startup.cs" />
@@ -312,10 +317,10 @@
     <Content Include="Views\Rentals\Checkout.cshtml" />
     <Content Include="Views\Rentals\Success.cshtml" />
     <Content Include="Views\Rentals\ReturnVehicle.cshtml" />
+    <Content Include="Views\Rentals\ReturnVehicles.cshtml" />
     <Content Include="Views\Rentals\MyRentals.cshtml" />
     <Content Include="Views\Rentals\TripInProgress.cshtml" />
     <Content Include="Views\Vehicles\Tracking.cshtml" />
-    <Content Include="Views\Reports\RevenueByUser.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -359,6 +364,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605051742227_Update_For_RentalStatus.resx">
       <DependentUpon>202605051742227_Update_For_RentalStatus.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605151723022_AddUserTypeToUsers.resx">
+      <DependentUpon>202605151723022_AddUserTypeToUsers.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

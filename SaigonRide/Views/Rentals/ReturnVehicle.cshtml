@@ -3,8 +3,7 @@
     ViewBag.Title = "Kết thúc chuyến đi";
 }
 
-<div class="saigon-content">
-    <div class="card border-0 shadow-sm mx-auto" style="max-width: 600px; border-radius: 15px;">
+<div class="card border-0 shadow-sm mx-auto" style="max-width: 600px; border-radius: 15px;">
         <div class="card-header bg-success text-white p-4" style="border-radius: 15px 15px 0 0; background: #0f766e !important;">
             <h3 class="mb-0 text-center">Xác nhận trả xe</h3>
         </div>
@@ -36,7 +35,7 @@
                 @Html.HiddenFor(m => m.Id)
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold"><i class="bi bi-geo-alt"></i> Chọn trạm bạn đang đứng để trả xe:</label>
+                    <label class="form-label fw-bold">Chọn trạm bạn đang đứng để trả xe:</label>
                     @Html.DropDownList("EndStationId", (SelectList)ViewBag.Stations, "-- Chọn trạm trả xe --", new { @class = "form-select form-select-lg", required = "required" })
                     <div class="form-text text-danger">* Bạn phải trả xe tại trạm để kết thúc tính phí.</div>
                 </div>
@@ -49,5 +48,4 @@
                 </div>
             }
         </div>
-    </div>
 </div>

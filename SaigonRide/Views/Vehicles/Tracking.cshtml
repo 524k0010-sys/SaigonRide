@@ -3,7 +3,15 @@
     ViewBag.Title = "Vehicle Tracking";
 }
 
-<h2>Vehicle Tracking</h2>
+<div class="admin-page-header">
+    <h2>Vehicle Tracking</h2>
+    <p>Filter vehicles by station and operating status.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
 
 <form method="get" class="row g-3 mb-3">
     <div class="col-auto">
@@ -23,6 +31,7 @@
     </div>
 </form>
 
+<div class="table-responsive">
 <table class="table table-striped">
     <thead>
         <tr>
@@ -51,3 +60,4 @@
         }
     </tbody>
 </table>
+</div>

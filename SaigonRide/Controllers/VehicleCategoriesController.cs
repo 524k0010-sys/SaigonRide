@@ -7,12 +7,10 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using SaigonRide.Models;
-using System.Data.Entity.Migrations;
-using System.Data.Entity.Infrastructure;
 
 namespace SaigonRide.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class VehicleCategoriesController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
@@ -113,6 +111,17 @@ namespace SaigonRide.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             VehicleCategory vehicleCategory = db.VehicleCategories.Find(id);
+            if (vehicleCategory == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (db.Vehicles.Any(v => v.VehicleCategoryId == id))
+            {
+                TempData["Error"] = "Cannot delete this category because vehicles are using it.";
+                return RedirectToAction("Index");
+            }
+
             db.VehicleCategories.Remove(vehicleCategory);
             db.SaveChanges();
             return RedirectToAction("Index");
@@ -125,15 +134,6 @@ namespace SaigonRide.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
-        }
-
-        static VehicleCategoriesController()
-        {
-            Database.SetInitializer(
-                new MigrateDatabaseToLatestVersion<
-                    SaigonRide.Models.ApplicationDbContext,
-                    SaigonRide.Migrations.Configuration>());
-
         }
     }
 }

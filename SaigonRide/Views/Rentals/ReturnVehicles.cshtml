@@ -1,0 +1,64 @@
+@model System.Collections.Generic.IList<SaigonRide.Models.Rental>
+
+@{
+    ViewBag.Title = "Return Vehicle";
+    var hasRentals = Model != null && Model.Count > 0;
+}
+
+<div class="admin-page-header">
+    <h2>Tr&#x1EA3; xe &#x0111;ang thu&#x00EA;</h2>
+    <p>Danh s&#x00E1;ch xe &#x0111;ang &#x0111;&#x01B0;&#x1EE3;c thu&#x00EA; b&#x1EB1;ng t&#x00E0;i kho&#x1EA3;n c&#x1EE7;a b&#x1EA1;n.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+@if (!hasRentals)
+{
+    <div class="form-card text-center py-5">
+        <h4>B&#x1EA1;n ch&#x01B0;a c&#x00F3; xe n&#x00E0;o &#x0111;ang thu&#x00EA;.</h4>
+        <p class="text-muted mb-4">Khi b&#x1EA1;n b&#x1EAF;t &#x0111;&#x1EA7;u m&#x1ED9;t chuy&#x1EBF;n &#x0111;i, xe &#x0111;&#x00F3; s&#x1EBD; xu&#x1EA5;t hi&#x1EC7;n t&#x1EA1;i &#x0111;&#x00E2;y &#x0111;&#x1EC3; tr&#x1EA3; xe nhanh.</p>
+        <a class="btn btn-success" href="@Url.Action("Available", "Rentals")">Thu&#x00EA; xe ngay</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+            <thead>
+                <tr>
+                    <th>M&#x00E3; xe</th>
+                    <th>Lo&#x1EA1;i xe</th>
+                    <th>Tr&#x1EA1;m b&#x1EAF;t &#x0111;&#x1EA7;u</th>
+                    <th>Gi&#x1EDD; b&#x1EAF;t &#x0111;&#x1EA7;u</th>
+                    <th>Th&#x1EDDi; gian &#x0111;ang &#x0111;i</th>
+                    <th>Tr&#x1EA1;ng th&#x00E1;i</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rental in Model)
+                {
+                    var durationMinutes = Math.Max(1, (int)Math.Ceiling((DateTime.Now - rental.StartTime).TotalMinutes));
+
+                    <tr>
+                        <td>@(rental.Vehicle != null ? rental.Vehicle.VehicleCode : "-")</td>
+                        <td>@(rental.Vehicle != null && rental.Vehicle.VehicleCategory != null ? rental.Vehicle.VehicleCategory.Name : "-")</td>
+                        <td>@(rental.StartStation != null ? rental.StartStation.Name : "-")</td>
+                        <td>@rental.StartTime.ToString("HH:mm - dd/MM/yyyy")</td>
+                        <td>@durationMinutes ph&#x00FA;t</td>
+                        <td><span class="badge bg-warning text-dark">&#x0110;ang thu&#x00EA;</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-primary" href="@Url.Action("ReturnVehicle", "Rentals", new { id = rental.Id })">Tr&#x1EA3; xe</a>
+                            <a class="btn btn-sm btn-outline-secondary ms-1" href="@Url.Action("TripInProgress", "Rentals", new { id = rental.Id })">Chi ti&#x1EBF;t</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
