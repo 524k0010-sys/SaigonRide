@@ -90,4 +90,5 @@ Port already in use:
 To confirm the project builds:
 1. In Visual Studio, choose Build > Rebuild Solution.
 2. The SaigonRide project should compile successfully.
-> HOSTING LINK: http://saigonride.somee.com/ 
+> HOSTING LINK: http://saigonride.somee.com/
+> Google Drive Link: https://drive.google.com/drive/folders/1fPn0XWNjh8tPWYkdsmvCx_5jnXlCV4g2?usp=drive_link
