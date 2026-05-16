@@ -1,0 +1,51 @@
+﻿@model SaigonRide.Models.Rental
+@{
+    ViewBag.Title = "Kết thúc chuyến đi";
+}
+
+<div class="card border-0 shadow-sm mx-auto" style="max-width: 600px; border-radius: 15px;">
+        <div class="card-header bg-success text-white p-4" style="border-radius: 15px 15px 0 0; background: #0f766e !important;">
+            <h3 class="mb-0 text-center">Xác nhận trả xe</h3>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert alert-light border mb-4">
+                <div class="row">
+                    <div class="col-6">
+                        <label class="text-muted small">Mã xe</label>
+                        <p class="fw-bold mb-2">@Model.Vehicle.VehicleCode</p>
+
+                        <label class="text-muted small">Giờ bắt đầu</label>
+                        <p class="fw-bold mb-0">@Model.StartTime.ToString("HH:mm - dd/MM/yyyy")</p>
+                    </div>
+                    <div class="col-6 text-end">
+                        <label class="text-muted small">Đơn giá</label>
+                        <p class="fw-bold mb-2">@Model.Vehicle.VehicleCategory.PricePerMinute.ToString("N0") đ/phút</p>
+
+                        <label class="text-muted small">Thời gian đã đi</label>
+                        <p class="fw-bold mb-0">
+                            @Math.Ceiling((DateTime.Now - Model.StartTime).TotalMinutes) phút
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            @using (Html.BeginForm("ProcessReturn", "Rentals", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.Id)
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Chọn trạm bạn đang đứng để trả xe:</label>
+                    @Html.DropDownList("EndStationId", (SelectList)ViewBag.Stations, "-- Chọn trạm trả xe --", new { @class = "form-select form-select-lg", required = "required" })
+                    <div class="form-text text-danger">* Bạn phải trả xe tại trạm để kết thúc tính phí.</div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg shadow-sm" style="background: #0f766e; border: none;">
+                        Xác nhận trả xe & Thanh toán
+                    </button>
+                    <a href="@Url.Action("MyRentals", "Rentals")" class="btn btn-link text-muted mt-2">Hủy bỏ</a>
+                </div>
+            }
+        </div>
+</div>

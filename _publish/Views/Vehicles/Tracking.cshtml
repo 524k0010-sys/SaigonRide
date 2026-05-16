@@ -1,0 +1,63 @@
+@model IEnumerable<SaigonRide.Models.Vehicle>
+@{
+    ViewBag.Title = "Vehicle Tracking";
+}
+
+<div class="admin-page-header">
+    <h2>Vehicle Tracking</h2>
+    <p>Filter vehicles by station and operating status.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<form method="get" class="row g-3 mb-3">
+    <div class="col-auto">
+        <select name="status" class="form-select">
+            <option value="">All statuses</option>
+            @foreach (var s in Enum.GetValues(typeof(SaigonRide.Models.VehicleStatus)))
+            {
+                <option value="@s" @(ViewBag.SelectedStatus == s.ToString() ? "selected" : "")>@s</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        @Html.DropDownList("stationId", (SelectList)ViewBag.Stations, "All stations", new { @class = "form-select" })
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Filter</button>
+    </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Vehicle Code</th>
+            <th>Category</th>
+            <th>Station</th>
+            <th>Status</th>
+            <th>Last Activity</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var lastMap = (Dictionary<int, DateTime?>)ViewBag.LastActivity;
+            DateTime? last = null;
+            if (lastMap.ContainsKey(item.Id)) { last = lastMap[item.Id]; }
+
+            <tr>
+                <td>@item.VehicleCode</td>
+                <td>@item.VehicleCategory.Name</td>
+                <td>@(item.Station == null ? "-" : item.Station.Name)</td>
+                <td>@item.Status</td>
+                <td>@(last.HasValue ? last.Value.ToString("g") : "-")</td>
+                @* removed inline select column *@
+            </tr>
+        }
+    </tbody>
+</table>
+</div>

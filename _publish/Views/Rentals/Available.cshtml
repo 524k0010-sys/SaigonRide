@@ -1,0 +1,92 @@
+﻿@model IEnumerable<SaigonRide.Models.Vehicle>
+
+@{
+    ViewBag.Title = "Available Vehicles";
+}
+
+<div class="admin-page-header">
+    <h2>Available Vehicles</h2>
+    <p>Select a ready vehicle to start a rental trip.</p>
+</div>
+
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["Error"]
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Vehicle Code</th>
+                <th>Category</th>
+                <th>Price / Minute</th>
+                <th>Station</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.VehicleCode</td>
+                    <td>@item.VehicleCategory.Name</td>
+                    <td>@item.VehicleCategory.PricePerMinute.ToString("N0") VND</td>
+                    <td>@item.Station.Name</td>
+                    <td><span class="badge bg-success">Ready</span></td>
+                    <td>
+                        <form class="start-trip-form" method="post" action="@Url.Action("StartTrip", "Rentals")" style="display:inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <button type="submit" class="btn btn-success btn-sm">Start Trip</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section scripts{
+    <script>
+        (function(){
+            var tripUrlBase = '@Url.Action("TripInProgress", "Rentals")';
+            document.querySelectorAll('.start-trip-form').forEach(function(form){
+                form.addEventListener('submit', function(e){
+                    e.preventDefault();
+                    var data = new FormData(form);
+                    var token = form.querySelector('input[name="__RequestVerificationToken"]').value;
+
+                    fetch(form.action, {
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': token,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: data,
+                        credentials: 'same-origin'
+                    }).then(function(resp){
+                        if (!resp.ok) {
+                            throw new Error('Unable to start trip.');
+                        }
+                        return resp.json();
+                    }).then(function(json){
+                        if (json && json.success){
+                            var row = form.closest('tr');
+                            if (row) row.parentNode.removeChild(row);
+                            window.location = tripUrlBase + '/' + json.rentalId;
+                        } else {
+                            alert((json && json.message) || 'Unable to start trip.');
+                        }
+                    }).catch(function(){
+                        alert('Unable to start trip (network error).');
+                    });
+                });
+            });
+        })();
+    </script>
+}

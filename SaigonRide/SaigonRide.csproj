@@ -312,6 +312,7 @@
     <Content Include="Views\VehicleCategories\Index.cshtml" />
     <Content Include="Views\Reports\Inventory.cshtml" />
     <Content Include="Views\Reports\Revenue.cshtml" />
+    <Content Include="Views\Reports\MyRevenue.cshtml" />
     <Content Include="Views\Rentals\Available.cshtml" />
     <Content Include="Views\Rentals\EndTrip.cshtml" />
     <Content Include="Views\Rentals\Checkout.cshtml" />

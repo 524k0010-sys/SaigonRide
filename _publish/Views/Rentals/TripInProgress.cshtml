@@ -1,0 +1,32 @@
+@model SaigonRide.Models.Rental
+@{
+    ViewBag.Title = "Trip In Progress";
+}
+
+<div class="card shadow-sm">
+        <div class="card-header bg-success text-white p-3">
+            <h4 class="mb-0">Trip In Progress</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Vehicle:</strong> @Model.Vehicle.VehicleCode</p>
+                    <p><strong>Category:</strong> @Model.Vehicle.VehicleCategory.Name</p>
+                    <p><strong>Start Station:</strong> @Model.StartStation.Name</p>
+                    <p><strong>Start Time:</strong> @Model.StartTime.ToString("g")</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <p class="text-muted">Viewing as Admin</p>
+                        <a class="btn btn-warning" href="@Url.Action("ReturnVehicle", "Rentals", new { id = Model.Id })">Admin Return</a>
+                    }
+                    else
+                    {
+                        <p class="text-muted">Viewing as Customer</p>
+                        <a class="btn btn-primary" href="@Url.Action("ReturnVehicle", "Rentals", new { id = Model.Id })">Return Vehicle</a>
+                    }
+                </div>
+            </div>
+        </div>
+</div>

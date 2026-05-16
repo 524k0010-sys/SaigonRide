@@ -1,0 +1,90 @@
+﻿@model SaigonRide.ViewModels.CheckoutViewModel
+
+@{
+    ViewBag.Title = "Checkout";
+}
+
+<div class="admin-page-header">
+    <h2>Checkout</h2>
+    <p>Review the calculated fare and confirm the payment method.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="form-card">
+            <h4>Trip Summary</h4>
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Vehicle</th>
+                    <td>@Model.VehicleCode</td>
+                </tr>
+                <tr>
+                    <th>Category</th>
+                    <td>@Model.VehicleCategory</td>
+                </tr>
+                <tr>
+                    <th>Return Station</th>
+                    <td>@Model.ReturnStationName</td>
+                </tr>
+                <tr>
+                    <th>Duration</th>
+                    <td>@Model.DurationMinutes minutes</td>
+                </tr>
+                <tr>
+                    <th>Base Fare</th>
+                    <td>@Model.BaseFare.ToString("N0") VND</td>
+                </tr>
+                <tr>
+                    <th>Discount</th>
+                    <td>@Model.DiscountAmount.ToString("N0") VND</td>
+                </tr>
+                <tr>
+                    <th>Total Fare</th>
+                    <td><strong>@Model.TotalFare.ToString("N0") VND</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="col-md-5">
+        <div class="form-card">
+            <h4>Payment</h4>
+            <p>User Type: <strong>@Model.UserType</strong></p>
+
+            @using (Html.BeginForm("ConfirmPayment", "Rentals", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.RentalId)
+                @Html.HiddenFor(m => m.VehicleCode)
+                @Html.HiddenFor(m => m.VehicleCategory)
+                @Html.HiddenFor(m => m.ReturnStationName)
+                @Html.HiddenFor(m => m.UserType)
+                @Html.HiddenFor(m => m.DurationMinutes)
+                @Html.HiddenFor(m => m.BaseFare)
+                @Html.HiddenFor(m => m.DiscountAmount)
+                @Html.HiddenFor(m => m.TotalFare)
+
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="mb-3">
+                    <label class="form-label">Choose payment method</label>
+
+                    @foreach (var method in Model.PaymentMethods)
+                    {
+                        <div class="form-check payment-choice">
+                            @Html.RadioButtonFor(m => m.PaymentMethod, method.Value, new { @class = "form-check-input", id = "pay_" + method.Value })
+                            <label class="form-check-label" for="pay_@method.Value">
+                                @method.Text
+                            </label>
+                        </div>
+                    }
+
+                    @Html.ValidationMessageFor(m => m.PaymentMethod, "", new { @class = "text-danger" })
+                </div>
+
+                <button type="submit" class="btn btn-success w-100">Confirm Payment</button>
+            }
+        </div>
+    </div>
+</div>

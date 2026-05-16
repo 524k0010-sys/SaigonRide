@@ -1,0 +1,38 @@
+﻿@model IEnumerable<SaigonRide.ViewModels.StationInventoryReportViewModel>
+
+@{
+    ViewBag.Title = "Station Inventory Report";
+}
+
+<div class="admin-page-header">
+    <h2>Station Inventory Report</h2>
+    <p>Monitor station capacity, utilization, and vehicle readiness.</p>
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Station</th>
+            <th>Capacity</th>
+            <th>Current Inventory</th>
+            <th>Utilization %</th>
+            <th>Ready Vehicles</th>
+            <th>Maintenance Vehicles</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.StationName</td>
+                <td>@item.Capacity</td>
+                <td>@item.CurrentInventory</td>
+                <td>@item.UtilizationPercent.ToString("0.00")%</td>
+                <td>@item.ReadyVehicles</td>
+                <td>@item.MaintenanceVehicles</td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>

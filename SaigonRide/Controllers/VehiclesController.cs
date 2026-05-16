@@ -75,6 +75,12 @@ namespace SaigonRide.Controllers
                 return HttpNotFound();
             }
 
+            if (status != vehicle.Status && HasUnfinishedRental(vehicle.Id))
+            {
+                TempData["Error"] = "Cannot update this vehicle because it is currently rented by a user.";
+                return RedirectToAction("Tracking");
+            }
+
             var deltas = BuildInventoryDeltas(vehicle.StationId, vehicle.Status, vehicle.StationId, status);
             ValidateInventoryDeltas(deltas);
             if (!ModelState.IsValid)
@@ -223,6 +229,11 @@ namespace SaigonRide.Controllers
                 ModelState.AddModelError("VehicleCode", "Vehicle code already exists.");
             }
 
+            if (HasUnfinishedRental(vehicle.Id) && HasVehicleChanges(existing, vehicle))
+            {
+                ModelState.AddModelError("", "Cannot update this vehicle because it is currently rented by a user.");
+            }
+
             var deltas = BuildInventoryDeltas(existing.StationId, existing.Status, vehicle.StationId, vehicle.Status);
             ValidateInventoryDeltas(deltas);
 
@@ -300,6 +311,23 @@ namespace SaigonRide.Controllers
         private static bool CountsAsStationInventory(VehicleStatus status)
         {
             return status != VehicleStatus.InTransit;
+        }
+
+        private bool HasUnfinishedRental(int vehicleId)
+        {
+            return db.Rentals.Any(r =>
+                r.VehicleId == vehicleId &&
+                r.Status != RentalStatus.Cancelled &&
+                (!r.EndTime.HasValue ||
+                 !db.Payments.Any(p => p.RentalId == r.Id && p.Status == PaymentStatus.Success)));
+        }
+
+        private static bool HasVehicleChanges(Vehicle existing, Vehicle updated)
+        {
+            return existing.VehicleCode != updated.VehicleCode ||
+                   existing.VehicleCategoryId != updated.VehicleCategoryId ||
+                   existing.StationId != updated.StationId ||
+                   existing.Status != updated.Status;
         }
 
         private static List<string> BuildVehicleCodes(string vehicleCode, int quantity)

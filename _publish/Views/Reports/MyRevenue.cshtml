@@ -1,0 +1,57 @@
+@model IEnumerable<SaigonRide.Models.Rental>
+
+@{
+    ViewBag.Title = "My Revenue";
+    var totalRentals = ViewBag.TotalRentals as int? ?? 0;
+    var totalRevenue = ViewBag.TotalRevenue as decimal? ?? 0m;
+}
+
+<div class="admin-page-header">
+    <h2>My Revenue</h2>
+    <p>Review your completed rentals and total spending.</p>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="text-muted">Total Rentals</div>
+            <div class="admin-stat">@totalRentals</div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="text-muted">Total Spending</div>
+            <div class="admin-stat">@totalRevenue.ToString("N0") VND</div>
+        </div>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Vehicle Code</th>
+                <th>Category</th>
+                <th>Start Station</th>
+                <th>Return Station</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Total Fare</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@(item.Vehicle != null ? item.Vehicle.VehicleCode : "-")</td>
+                    <td>@(item.Vehicle != null && item.Vehicle.VehicleCategory != null ? item.Vehicle.VehicleCategory.Name : "-")</td>
+                    <td>@(item.StartStation != null ? item.StartStation.Name : "-")</td>
+                    <td>@(item.ReturnStation != null ? item.ReturnStation.Name : "-")</td>
+                    <td>@item.StartTime.ToString("g")</td>
+                    <td>@(item.EndTime.HasValue ? item.EndTime.Value.ToString("g") : "-")</td>
+                    <td>@item.TotalFare.ToString("N0") VND</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
